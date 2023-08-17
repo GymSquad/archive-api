@@ -1,7 +1,13 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+
+	_ "github.com/joho/godotenv/autoload"
+)
 
 func main() {
-	fmt.Println("hello world!")
+	rootPath := os.Getenv("ROOT_PATH")
+	fmt.Println(rootPath)
 }
