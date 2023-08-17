@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -13,28 +11,28 @@ import (
 
 func main() {
 	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
-
+	r.GET("/api/website/:websiteId", getArchiveDates)
 	r.Run()
 
+}
+
+func getArchiveDates(c *gin.Context) {
 	rootPath := os.Getenv("ROOT_PATH")
-	fmt.Println(rootPath)
 
-	archiveId := "baba-board"
-
+	archiveId := c.Param("websiteId")
 	entries, err := os.ReadDir(filepath.Join(rootPath, archiveId))
+
 	if err != nil {
-		log.Fatal(err)
+		c.String(http.StatusNotFound, "Not Found")
 	}
 
+	dates := []string{}
 	for _, entry := range entries {
-		if entry.IsDir() {
-			fmt.Println(entry.Name())
+		if !entry.IsDir() {
+			continue
 		}
+		dates = append(dates, entry.Name())
 	}
 
+	c.JSON(http.StatusOK, dates)
 }
