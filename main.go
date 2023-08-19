@@ -5,13 +5,14 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/joho/godotenv/autoload"
 )
 
 func main() {
-	rootPath := os.Getenv("ROOT_PATH")
+	rootPath := strings.Trim(os.Getenv("ROOT_PATH"), "\"")
 	slog.Info("Config loaded", "rootPath", rootPath)
 
 	r := gin.Default()
