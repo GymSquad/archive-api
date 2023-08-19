@@ -11,30 +11,35 @@ import (
 )
 
 func main() {
+	rootPath := os.Getenv("ROOT_PATH")
+	slog.Info("Config loaded", "rootPath", rootPath)
+
 	r := gin.Default()
-	r.GET("/api/website/:websiteId", getArchiveDates)
-	if err := r.Run(); err != nil {
+	r.GET("/api/website/:websiteId", getArchiveDates(rootPath))
+
+	slog.Info("Starting server at", "url", "http://localhost:8080")
+	if err := r.Run(":8080"); err != nil {
 		slog.Error("Failed to start server", "err", err)
 	}
 }
 
-func getArchiveDates(c *gin.Context) {
-	rootPath := os.Getenv("ROOT_PATH")
+func getArchiveDates(rootPath string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		archiveId := c.Param("websiteId")
+		entries, err := os.ReadDir(filepath.Join(rootPath, archiveId))
 
-	archiveId := c.Param("websiteId")
-	entries, err := os.ReadDir(filepath.Join(rootPath, archiveId))
-
-	if err != nil {
-		c.String(http.StatusNotFound, "Not Found")
-	}
-
-	dates := []string{}
-	for _, entry := range entries {
-		if !entry.IsDir() {
-			continue
+		if err != nil {
+			c.String(http.StatusNotFound, "Not Found")
 		}
-		dates = append(dates, entry.Name())
-	}
 
-	c.JSON(http.StatusOK, dates)
+		dates := []string{}
+		for _, entry := range entries {
+			if !entry.IsDir() {
+				continue
+			}
+			dates = append(dates, entry.Name())
+		}
+
+		c.JSON(http.StatusOK, dates)
+	}
 }
