@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -12,8 +13,9 @@ import (
 func main() {
 	r := gin.Default()
 	r.GET("/api/website/:websiteId", getArchiveDates)
-	r.Run()
-
+	if err := r.Run(); err != nil {
+		slog.Error("Failed to start server", "err", err)
+	}
 }
 
 func getArchiveDates(c *gin.Context) {
