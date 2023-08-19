@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+  api:
+    container_name: archive-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ${ROOT_PATH:-./}:/archive

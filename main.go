@@ -5,18 +5,18 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/gin-gonic/gin"
-	_ "github.com/joho/godotenv/autoload"
+)
+
+const (
+	// RootPath is the path to the root of the archive``
+	RootPath = "/archive"
 )
 
 func main() {
-	rootPath := strings.Trim(os.Getenv("ROOT_PATH"), "\"")
-	slog.Info("Config loaded", "rootPath", rootPath)
-
 	r := gin.Default()
-	r.GET("/api/website/:websiteId", getArchiveDates(rootPath))
+	r.GET("/api/website/:websiteId", getArchiveDates(RootPath))
 
 	slog.Info("Starting server at", "url", "http://localhost:8080")
 	if err := r.Run(":8080"); err != nil {
