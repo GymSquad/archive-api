@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -24,6 +25,12 @@ func main() {
 	}
 }
 
+func isDate(date string) bool {
+	date = date + "T00:00:00Z"
+	_, err := time.Parse(time.RFC3339, date)
+	return err == nil
+}
+
 func getArchiveDates(rootPath string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		archiveId := c.Param("websiteId")
@@ -35,7 +42,7 @@ func getArchiveDates(rootPath string) gin.HandlerFunc {
 
 		dates := []string{}
 		for _, entry := range entries {
-			if !entry.IsDir() {
+			if !entry.IsDir() || !isDate(entry.Name()) {
 				continue
 			}
 			dates = append(dates, entry.Name())
