@@ -2,12 +2,13 @@ package main
 
 import (
 	"log/slog"
-	"net/http"
-	"os"
-	"path/filepath"
-	"time"
 
+	_ "github.com/GymSquad/archive-api/docs"
+	getarchiveddates "github.com/GymSquad/archive-api/internal/features/get-archived-dates"
+	searcharchives "github.com/GymSquad/archive-api/internal/features/search-archives"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 const (
@@ -15,9 +16,22 @@ const (
 	RootPath = "/archive"
 )
 
+// @title NYCU Library Web Archive API
+// @description Minimal API for the NYCU Library Web Archive project
+// @version 1.0.0
+
+// @host localhost:8080
+// @BasePath /api
 func main() {
 	r := gin.Default()
-	r.GET("/api/website/:websiteId", getArchiveDates(RootPath))
+
+	getArchiveDatesHandler := getarchiveddates.NewHTTPHandler(RootPath)
+	searcharchivesHandler := searcharchives.NewHTTPHandler(nil)
+
+	g := r.Group("/api")
+	RegisterRoutes(g, getArchiveDatesHandler, searcharchivesHandler)
+
+	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	slog.Info("Starting server at", "url", "http://localhost:8080")
 	if err := r.Run(":8080"); err != nil {
@@ -25,29 +39,12 @@ func main() {
 	}
 }
 
-func isDate(date string) bool {
-	date = date + "T00:00:00Z"
-	_, err := time.Parse(time.RFC3339, date)
-	return err == nil
+type Routable interface {
+	RegisterRoutes(router gin.IRouter)
 }
 
-func getArchiveDates(rootPath string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		archiveId := c.Param("websiteId")
-		entries, err := os.ReadDir(filepath.Join(rootPath, archiveId))
-
-		if err != nil {
-			c.String(http.StatusNotFound, "Not Found")
-		}
-
-		dates := []string{}
-		for _, entry := range entries {
-			if !entry.IsDir() || !isDate(entry.Name()) {
-				continue
-			}
-			dates = append(dates, entry.Name())
-		}
-
-		c.JSON(http.StatusOK, dates)
+func RegisterRoutes(router gin.IRouter, handlers ...Routable) {
+	for _, handler := range handlers {
+		handler.RegisterRoutes(router)
 	}
 }

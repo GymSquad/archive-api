@@ -1,0 +1,92 @@
+basePath: /api
+definitions:
+  searcharchives.SearchArchivesPagination:
+    properties:
+      next_cursor:
+        type: string
+    type: object
+  searcharchives.SearchArchivesResponse:
+    properties:
+      pagination:
+        $ref: '#/definitions/searcharchives.SearchArchivesPagination'
+      results:
+        items:
+          $ref: '#/definitions/searcharchives.SearchArchivesResult'
+        type: array
+    type: object
+  searcharchives.SearchArchivesResult:
+    properties:
+      archive_id:
+        type: string
+      date:
+        type: string
+      website_id:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Minimal API for the NYCU Library Web Archive project
+  title: NYCU Library Web Archive API
+  version: 1.0.0
+paths:
+  /search:
+    get:
+      description: Search the archives
+      parameters:
+      - description: Search query
+        in: query
+        name: q
+        type: string
+      - description: Cursor
+        in: query
+        name: cursor
+        type: string
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/searcharchives.SearchArchivesResponse'
+        "400":
+          description: Invalid input
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Search archives
+      tags:
+      - archive
+  /website/{websiteId}:
+    get:
+      description: Get the dates that a website was archived
+      parameters:
+      - description: Website ID
+        in: path
+        name: websiteId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of dates
+          schema:
+            items:
+              type: string
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      summary: Get archived dates
+      tags:
+      - archive
+swagger: "2.0"
