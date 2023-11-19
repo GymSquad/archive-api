@@ -1,0 +1,35 @@
+name: OpenAPI Sync Check
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check-openapi:
+    name: Check if OpenAPI documents are synchronized with the program code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Go 1.21
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.21.x
+          cache: false
+
+      - name: Install OpenAPI Generator
+        run: make install-tools
+
+      - name: Save Current Copy of OpenAPI Documents
+        run: cp -r docs docs-repo
+
+      - name: Generate OpenAPI documents
+        run: make gen-docs
+
+      - name: Check if OpenAPI documents are synchronized with the program code
+        # If the diff command returns a non-zero exit code, the job will fail.
+        run: diff --color --side-by-side docs-repo docs
