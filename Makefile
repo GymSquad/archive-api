@@ -7,15 +7,15 @@ NC = \033[0m
 
 .PHONY: install-tools
 install-tools:
-	@if ! command -v $(GOBIN)/swag >/dev/null 2>&1; then \
-		echo "[$(GREEN)*$(NC)] Installing swag"; \
-		$(GO) install github.com/swaggo/swag/cmd/swag@latest; \
+	@if ! command -v $(GOBIN)/oapi-codegen >/dev/null 2>&1; then \
+		echo "[$(GREEN)*$(NC)] Installing oapi-codegen"; \
+		$(GO) install github.com/deepmap/oapi-codegen/v2/cmd/oapi-codegen@latest; \
 	fi
 
-.PHONY: gen-docs
-gen-docs: install-tools
-	@echo "[$(GREEN)*$(NC)] Generating swagger docs"
-	@$(GOBIN)/swag init
+.PHONY: generate
+generate: install-tools
+	@echo "[$(GREEN)*$(NC)] Generating the server code from the OpenAPI spec"
+	@$(GOBIN)/oapi-codegen -package api -generate types,server,spec docs/openapi.yml > api/api.gen.go
 
 .PHONY: deps
 deps:
