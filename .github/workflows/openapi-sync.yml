@@ -9,7 +9,7 @@ on:
 
 jobs:
   check-openapi:
-    name: Check if OpenAPI documents are synchronized with the program code
+    name: Check Generated Server Code Sync
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -21,17 +21,17 @@ jobs:
           go-version: 1.21.x
           cache: false
 
-      - name: Install OpenAPI Generator
+      - name: Install OpenAPI to Code Generator
         run: make install-tools
 
-      - name: Save Current Copy of OpenAPI Documents
-        run: cp -r docs docs-repo
+      - name: Save Current Copy of Generated Server Code
+        run: cp -r api api-repo
 
-      - name: Generate OpenAPI documents
-        run: make gen-docs
+      - name: Generate Latest Server Code
+        run: make generate
 
       - name: Install difftastic
         run: wget https://github.com/Wilfred/difftastic/releases/download/0.52.0/difft-x86_64-unknown-linux-gnu.tar.gz -O - | tar -xz
 
-      - name: Check if OpenAPI documents are synchronized with the program code
-        run: ./difft --color=always --exit-code docs-repo docs
+      - name: Check if Generated Server Code is in Sync
+        run: ./difft --color=always --exit-code api-repo api
