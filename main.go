@@ -1,14 +1,10 @@
 package main
 
 import (
-	"log/slog"
-
-	_ "github.com/GymSquad/archive-api/docs"
-	getarchiveddates "github.com/GymSquad/archive-api/internal/features/get-archived-dates"
-	searcharchives "github.com/GymSquad/archive-api/internal/features/search-archives"
-	"github.com/gin-gonic/gin"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/GymSquad/archive-api/api"
+	swaggerui "github.com/GymSquad/archive-api/internal/features/swagger-ui"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 const (
@@ -16,35 +12,38 @@ const (
 	RootPath = "/archive"
 )
 
-// @title NYCU Library Web Archive API
-// @description Minimal API for the NYCU Library Web Archive project
-// @version 1.0.0
-
-// @host localhost:8080
-// @BasePath /api
 func main() {
-	r := gin.Default()
+	e := echo.New()
+	e.Use(middleware.Logger(), middleware.Recover())
 
-	getArchiveDatesHandler := getarchiveddates.NewHTTPHandler(RootPath)
-	searcharchivesHandler := searcharchives.NewHTTPHandler(nil)
+	s := &svc{}
+	api.RegisterHandlers(e, s)
 
-	g := r.Group("/api")
-	RegisterRoutes(g, getArchiveDatesHandler, searcharchivesHandler)
-
-	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
-	slog.Info("Starting server at", "url", "http://localhost:8080")
-	if err := r.Run(":8080"); err != nil {
-		slog.Error("Failed to start server", "err", err)
+	// Register swagger handlers
+	swaggerHandler, err := swaggerui.DefaultHandler()
+	if err != nil {
+		e.Logger.Fatalf("Failed to create swagger handler: %v", err)
 	}
+	swaggerHandler.Register(e)
+
+	e.Logger.Fatal(e.Start(":8080"))
 }
 
-type Routable interface {
-	RegisterRoutes(router gin.IRouter)
+type svc struct{}
+
+// GetApiWebsiteSearch implements archiveapi.ServerInterface.
+func (*svc) GetApiWebsiteSearch(c echo.Context, params api.GetApiWebsiteSearchParams) error {
+	panic("unimplemented")
 }
 
-func RegisterRoutes(router gin.IRouter, handlers ...Routable) {
-	for _, handler := range handlers {
-		handler.RegisterRoutes(router)
-	}
+// GetApiWebsiteWebsiteId implements archiveapi.ServerInterface.
+func (*svc) GetApiWebsiteWebsiteId(c echo.Context, websiteId string) error {
+	panic("unimplemented")
 }
+
+// PatchApiWebsiteWebsiteId implements archiveapi.ServerInterface.
+func (*svc) PatchApiWebsiteWebsiteId(c echo.Context, websiteId string) error {
+	panic("unimplemented")
+}
+
+var _ api.ServerInterface = (*svc)(nil)
