@@ -30,6 +30,8 @@ jobs:
       - name: Generate OpenAPI documents
         run: make gen-docs
 
+      - name: Install difftastic
+        run: wget https://github.com/Wilfred/difftastic/releases/download/0.52.0/difft-x86_64-unknown-linux-gnu.tar.gz -O - | tar -xz
+
       - name: Check if OpenAPI documents are synchronized with the program code
-        # If the diff command returns a non-zero exit code, the job will fail.
-        run: diff --color --side-by-side docs-repo docs
+        run: ./difft --color=always --exit-code docs-repo docs
