@@ -14,8 +14,10 @@ install-tools:
 
 .PHONY: generate
 generate: install-tools
-	@echo "[$(GREEN)*$(NC)] Generating the server code from the OpenAPI spec"
-	@$(GOBIN)/oapi-codegen -package api -generate types,server,spec docs/openapi.yml > api/api.gen.go
+	@echo "[$(GREEN)*$(NC)] Generating types from OpenAPI spec"
+	@$(GOBIN)/oapi-codegen -config api/types.cfg.yml docs/openapi.yml
+	@echo "[$(GREEN)*$(NC)] Generating server code from OpenAPI spec"
+	@$(GOBIN)/oapi-codegen -config api/server.cfg.yml docs/openapi.yml
 
 .PHONY: deps
 deps:
