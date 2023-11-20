@@ -7,7 +7,7 @@ import (
 
 	"github.com/GymSquad/archive-api/api"
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/labstack/echo/v4"
+	"github.com/gin-gonic/gin"
 )
 
 type SwaggerUIHandler struct {
@@ -61,19 +61,19 @@ func DefaultHandler() (*SwaggerUIHandler, error) {
 }
 
 // Register registers the swagger ui handlers to the router
-func (h *SwaggerUIHandler) Register(router api.EchoRouter) {
+func (h *SwaggerUIHandler) Register(router gin.IRouter) {
 	router.GET(h.OpenAPIURL, h.HandleOpenAPI)
 	router.GET(h.SwaggerUIURL, h.HandleSwaggerUI)
 }
 
 // HandleOpenAPI handles the openapi.json endpoint
-func (h *SwaggerUIHandler) HandleOpenAPI(c echo.Context) error {
-	return c.JSON(200, h.swagger)
+func (h *SwaggerUIHandler) HandleOpenAPI(c *gin.Context) {
+	c.JSON(200, h.swagger)
 }
 
 // HandleSwaggerUI handles the swagger ui endpoint
-func (h *SwaggerUIHandler) HandleSwaggerUI(c echo.Context) error {
-	return h.swaggerTemplate.Execute(c.Response().Writer, &swaggerInfo{
+func (h *SwaggerUIHandler) HandleSwaggerUI(c *gin.Context) {
+	h.swaggerTemplate.Execute(c.Writer, &swaggerInfo{
 		Title: h.PageTitle,
 	})
 }
