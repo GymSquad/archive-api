@@ -3,6 +3,8 @@ package swaggerui
 import (
 	"fmt"
 	"html/template"
+	"log/slog"
+	"net/http"
 	"os"
 
 	"github.com/GymSquad/archive-api/api"
@@ -73,7 +75,13 @@ func (h *SwaggerUIHandler) HandleOpenAPI(c *gin.Context) {
 
 // HandleSwaggerUI handles the swagger ui endpoint
 func (h *SwaggerUIHandler) HandleSwaggerUI(c *gin.Context) {
-	h.swaggerTemplate.Execute(c.Writer, &swaggerInfo{
+	err := h.swaggerTemplate.Execute(c.Writer, &swaggerInfo{
 		Title: h.PageTitle,
 	})
+	if err != nil {
+		slog.Error("failed to execute swagger template", "err", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Internal server error",
+		})
+	}
 }
