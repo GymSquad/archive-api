@@ -1,0 +1,251 @@
+openapi: "3.1.0"
+
+info:
+  title: "WebArchive API"
+  description: "Minimal API for NYCU Library Web Archive Project"
+  version: "0.0.0"
+  servers:
+    - url: "http://localhost:8080"
+      description: "Development server"
+
+paths:
+  /api/website/{website_id}:
+    get:
+      description: "Get the archived dates of a website"
+      summary: "Get archived dates"
+      tags: [Website]
+      parameters:
+        - name: website_id
+          in: path
+          description: "Website ID"
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArchivedDates"
+        "404":
+          description: "Website not found"
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Not found"
+    patch:
+      description: "Update the information of a website"
+      summary: "Update website"
+      tags: [Website]
+      parameters:
+        - name: website_id
+          in: path
+          description: "Website ID"
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: "Website information to be updated"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateWebsitePayload"
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Website"
+
+  /api/website/search:
+    get:
+      description: "Search websites"
+      summary: "Search websites"
+      tags: [Website]
+      parameters:
+        - name: q
+          in: query
+          description: "Search query"
+          required: false
+          schema:
+            type: string
+        - name: cursor
+          in: query
+          description: "Cursor for pagination"
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: "Limit for pagination"
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebsiteSearchResult"
+        "400":
+          description: "Invalid cursor or limit"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid cursor"
+        "500":
+          description: "Internal server error"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Internal server error"
+
+components:
+  schemas:
+    ArchivedDates:
+      type: array
+      items:
+        type: string
+        format: date
+
+    Affiliation:
+      type: object
+      required: [campus, department, office]
+      properties:
+        campus:
+          description: "Campus name"
+          type: string
+          example: "交大相關"
+        department:
+          description: "Department name"
+          type: string
+          example: "行政單位"
+        office:
+          description: "Office name"
+          type: string
+          example: "圖書館"
+
+    Website:
+      allOf:
+        - $ref: "#/components/schemas/Affiliation"
+        - type: object
+          required: [id, name, url]
+          properties:
+            id:
+              description: "Website ID"
+              type: string
+            name:
+              description: "Website name"
+              type: string
+              example: "交通大學圖書館"
+            url:
+              description: "Website URL"
+              type: string
+              example: "http://www.lib.nctu.edu.tw/"
+
+    UpdateWebsitePayload:
+      type: object
+      properties:
+        affiliation:
+          description: "Affiliations of the website"
+          type: array
+          items:
+            type: object
+            required: [campus, department, office]
+            properties:
+              campus:
+                description: "Campus name"
+                type: string
+                example: "交大相關"
+              department:
+                description: "Department name"
+                type: string
+                example: "行政單位"
+              office:
+                description: "Office name"
+                type: string
+                example: "圖書館"
+        name:
+          description: "Website name"
+          type: string
+          example: "交通大學圖書館"
+        url:
+          description: "Website URL"
+          type: string
+          example: "http://www.lib.nctu.edu.tw/"
+
+    WebsiteSearchResult:
+      type: object
+      required: [result, pagination]
+      properties:
+        result:
+          type: array
+          items:
+            $ref: "#/components/schemas/SearchResultEntry"
+
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+
+    SearchResultEntry:
+      allOf:
+        - $ref: "#/components/schemas/Affiliation"
+        - type: object
+          required: [id, websites]
+          properties:
+            id:
+              description: "Composite ID made of campus, department, and office"
+              type: string
+              example: "campus-id$department-id$office-id"
+            websites:
+              type: array
+              items:
+                $ref: "#/components/schemas/SearchResultWebsiteEntry"
+
+    SearchResultWebsiteEntry:
+      type: object
+      required: [id, name, url]
+      properties:
+        id:
+          description: "Website ID"
+          type: string
+        name:
+          description: "Website name"
+          type: string
+          example: "交通大學圖書館"
+        url:
+          description: "Website URL"
+          type: string
+          example: "http://www.lib.nctu.edu.tw/"
+
+    Pagination:
+      type: object
+      required: [next_cursor, num_results, total_results]
+      properties:
+        next_cursor:
+          description: "Cursor for next page"
+          type: string
+          nullable: true
+        num_results:
+          description: "Number of websites returned in this page"
+          type: integer
+          minimum: 0
+        total_results:
+          description: "Total number of websites"
+          type: integer
+          minimum: 0
