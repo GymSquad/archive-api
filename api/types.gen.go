@@ -65,16 +65,7 @@ type SearchResultWebsiteEntry struct {
 // UpdateWebsitePayload defines model for UpdateWebsitePayload.
 type UpdateWebsitePayload struct {
 	// Affiliation Affiliations of the website
-	Affiliation *[]struct {
-		// Campus Campus name
-		Campus string `json:"campus"`
-
-		// Department Department name
-		Department string `json:"department"`
-
-		// Office Office name
-		Office string `json:"office"`
-	} `json:"affiliation,omitempty"`
+	Affiliation *[]Affiliation `json:"affiliation,omitempty"`
 
 	// Name Website name
 	Name *string `json:"name,omitempty"`
