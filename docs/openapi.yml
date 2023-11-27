@@ -166,21 +166,7 @@ components:
           description: "Affiliations of the website"
           type: array
           items:
-            type: object
-            required: [campus, department, office]
-            properties:
-              campus:
-                description: "Campus name"
-                type: string
-                example: "交大相關"
-              department:
-                description: "Department name"
-                type: string
-                example: "行政單位"
-              office:
-                description: "Office name"
-                type: string
-                example: "圖書館"
+            $ref: "#/components/schemas/Affiliation"
         name:
           description: "Website name"
           type: string
