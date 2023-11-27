@@ -32,10 +32,14 @@ A minimal API for the NYCU Library Web Archive project.
 
 ## Development
 
-We use [Gin](https://github.com/gin-gonic/gin) as the web framework, and [Gin Swagger](https://github.com/swaggo/gin-swagger) to generate OpenAPI documentation.
-
-### Generate API documentation
+We use oapi-codegen to generate the API code from the OpenAPI specification. To regenerate the code, run:
 
 ```bash
-make gen-docs
+make generate
+```
+
+### Seed the database
+
+```bash
+docker compose exec -T db psql -U ${DB_USER:-app} < /path/to/dump-file.sql
 ```

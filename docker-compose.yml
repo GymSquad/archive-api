@@ -6,7 +6,30 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    networks:
+      - archive-network
     ports:
       - "8080:8080"
     volumes:
       - ${ROOT_PATH:-./}:/archive
+
+  db:
+    container_name: archive-db
+    image: postgres:15.2
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-app}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-app}
+      POSTGRES_DB: ${DB_NAME:-db}
+    networks:
+      - archive-network
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+networks:
+  archive-network: {}
+
+volumes:
+  postgres-data: {}

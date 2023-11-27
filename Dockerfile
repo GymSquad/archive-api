@@ -6,7 +6,9 @@ COPY . .
 RUN go build -o /app/main .
 
 FROM scratch
+WORKDIR /app
 ENV GIN_MODE=release
 COPY --from=builder /app/main /app/main
+COPY docs /app/docs/
 ENTRYPOINT [ "/app/main" ]
 
