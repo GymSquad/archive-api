@@ -2,22 +2,22 @@ package updatewebsite
 
 import (
 	"context"
-	"database/sql"
 
 	"github.com/GymSquad/archive-api/api"
+	"github.com/GymSquad/archive-api/internal/db"
 	"github.com/GymSquad/archive-api/internal/server"
 )
 
 // UpdateWebsiteHandler is the handler for the update website endpoint
 type UpdateWebsiteHandler struct {
-	db *sql.DB
+	db db.DBTX
 }
 
 // Compile time check to ensure that UpdateWebsiteHandler implements server.UpdateWebsiteHandler.
 var _ server.UpdateWebsiteHandler = (*UpdateWebsiteHandler)(nil)
 
 // NewHTTPHandler creates a new UpdateWebsiteHandler
-func NewHTTPHandler(db *sql.DB) *UpdateWebsiteHandler {
+func NewHTTPHandler(db db.DBTX) *UpdateWebsiteHandler {
 	return &UpdateWebsiteHandler{
 		db: db,
 	}

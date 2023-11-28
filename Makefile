@@ -33,3 +33,15 @@ run:
 build:
 	@echo "[$(GREEN)*$(NC)] Building server"
 	@$(GO) build -o bin/server main.go
+
+.PHONY: install-air
+install-air:
+	@if ! command -v $(GOBIN)/air >/dev/null 2>&1; then \
+		echo "[$(GREEN)*$(NC)] Installing air"; \
+		$(GO) install github.com/cosmtrek/air@latest; \
+	fi
+
+.PHONY: dev
+dev: install-air
+	@echo "[$(GREEN)*$(NC)] Running server in dev mode"
+	@$(GOBIN)/air

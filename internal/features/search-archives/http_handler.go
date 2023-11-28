@@ -2,53 +2,62 @@ package searcharchives
 
 import (
 	"context"
-	"database/sql"
-	"strconv"
+	"errors"
 
 	"github.com/GymSquad/archive-api/api"
 	"github.com/GymSquad/archive-api/internal/server"
 )
 
-// SearchArchivesHandler is the handler for the search archives endpoint
-type SearchArchivesHandler struct {
-	db *sql.DB
+var (
+	// ErrorInvalidCursor is returned when the cursor is invalid
+	ErrorInvalidCursor = errors.New("invalid cursor")
+	// ErrorInternal is returned when an internal error occurs
+	ErrorInternal = errors.New("internal error")
+)
+
+type SearchArchivesQuery interface {
+	SearchArchives(ctx context.Context, query string, cursor *string, limit int) ([]api.SearchResultEntry, api.Pagination, error)
+}
+
+// SearchWebsitesHandler is the handler for the search websites endpoint
+type SearchWebsitesHandler struct {
+	query SearchArchivesQuery
 }
 
 // Compile time check to ensure that SearchArchivesHandler implements server.SearchWebsitesHandler.
-var _ server.SearchWebsitesHandler = (*SearchArchivesHandler)(nil)
+var _ server.SearchWebsitesHandler = (*SearchWebsitesHandler)(nil)
 
 // NewHTTPHandler creates a new SearchArchivesHandler
-func NewHTTPHandler(db *sql.DB) *SearchArchivesHandler {
-	return &SearchArchivesHandler{
-		db: db,
+func NewHTTPHandler(query SearchArchivesQuery) *SearchWebsitesHandler {
+	return &SearchWebsitesHandler{
+		query: query,
 	}
 }
 
 // HandleRequest implements server.SearchWebsitesHandler.
-func (*SearchArchivesHandler) HandleRequest(ctx context.Context, request api.GetApiWebsiteSearchRequestObject) (api.GetApiWebsiteSearchResponseObject, error) {
-	var result []api.SearchResultEntry
-	var pagination api.Pagination
-
-	result = append(result, api.SearchResultEntry{
-		Id:         "nctu-administration-library",
-		Campus:     "交大相關",
-		Department: "行政單位",
-		Office:     "圖書館",
-		Websites:   []api.SearchResultWebsiteEntry{},
-	})
-
-	for i := 0; i < 10; i++ {
-		result[0].Websites = append(result[0].Websites, api.SearchResultWebsiteEntry{
-			Id:   strconv.Itoa(i + 1),
-			Name: "交大圖書館",
-			Url:  "https://lib.nctu.edu.tw/",
-		})
+func (s *SearchWebsitesHandler) HandleRequest(ctx context.Context, request api.GetApiWebsiteSearchRequestObject) (api.GetApiWebsiteSearchResponseObject, error) {
+	query := ""
+	if request.Params.Q != nil {
+		query = *request.Params.Q
 	}
 
-	pagination = api.Pagination{
-		NextCursor:   nil,
-		NumResults:   10,
-		TotalResults: 10,
+	limit := 10
+	if request.Params.Limit != nil {
+		limit = *request.Params.Limit
+	}
+
+	result, pagination, err := s.query.SearchArchives(ctx, query, request.Params.Cursor, limit)
+	if err != nil {
+		if errors.Is(err, ErrorInvalidCursor) {
+			apiError := "invalid cursor"
+			return api.GetApiWebsiteSearch400JSONResponse{
+				Error: &apiError,
+			}, nil
+		}
+		apiError := "internal server error"
+		return api.GetApiWebsiteSearch500JSONResponse{
+			Error: &apiError,
+		}, nil
 	}
 
 	return api.GetApiWebsiteSearch200JSONResponse(api.WebsiteSearchResult{
