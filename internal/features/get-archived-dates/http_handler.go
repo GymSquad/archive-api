@@ -1,18 +1,22 @@
 package getarchiveddates
 
 import (
-	"net/http"
+	"context"
 	"os"
 	"path/filepath"
 	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/GymSquad/archive-api/api"
+	"github.com/GymSquad/archive-api/internal/server"
 )
 
 // GetArchiveDatesHandler is the handler for the get archive dates endpoint
 type GetArchiveDatesHandler struct {
 	RootPath string
 }
+
+// Compile time check to ensure that GetArchiveDatesHandler implements server.GetArchivedDatesHandler.
+var _ server.GetArchivedDatesHandler = (*GetArchiveDatesHandler)(nil)
 
 // NewHTTPHandler creates a new GetArchiveDatesHandler
 func NewHTTPHandler(rootPath string) *GetArchiveDatesHandler {
@@ -21,25 +25,12 @@ func NewHTTPHandler(rootPath string) *GetArchiveDatesHandler {
 	}
 }
 
-func (h *GetArchiveDatesHandler) RegisterRoutes(router gin.IRouter) {
-	router.GET("/website/:websiteId", h.Handle)
-}
-
-// Handle godoc
-//
-//	@Summary Get archived dates
-//	@Description Get the dates that a website was archived
-//	@Tags archive
-//	@Produce json
-//	@Param websiteId path string true "Website ID"
-//	@Success 200 {array} string "List of dates"
-//	@Failure 404 {string} string "Not Found"
-//	@Router /website/{websiteId} [get]
-func (h *GetArchiveDatesHandler) Handle(c *gin.Context) {
-	archiveId := c.Param("websiteId")
+// HandleRequest implements server.GetArchivedDatesHandler.
+func (h *GetArchiveDatesHandler) HandleRequest(ctx context.Context, request api.GetApiWebsiteWebsiteIdRequestObject) (api.GetApiWebsiteWebsiteIdResponseObject, error) {
+	archiveId := request.WebsiteId
 	entries, err := os.ReadDir(filepath.Join(h.RootPath, archiveId))
 	if err != nil {
-		c.String(http.StatusNotFound, "Not Found")
+		return api.GetApiWebsiteWebsiteId404JSONResponse("archive for the specified id not found"), nil
 	}
 
 	dates := []string{}
@@ -50,8 +41,9 @@ func (h *GetArchiveDatesHandler) Handle(c *gin.Context) {
 		dates = append(dates, entry.Name())
 	}
 
-	c.JSON(http.StatusOK, dates)
+	return api.GetApiWebsiteWebsiteId200JSONResponse(dates), nil
 }
+
 func isDate(date string) bool {
 	date = date + "T00:00:00Z"
 	_, err := time.Parse(time.RFC3339, date)

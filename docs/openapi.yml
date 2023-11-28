@@ -122,7 +122,6 @@ components:
       type: array
       items:
         type: string
-        format: date
 
     Affiliation:
       type: object

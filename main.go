@@ -1,29 +1,40 @@
 package main
 
 import (
-	"context"
 	"os"
-	"strconv"
-	"time"
 
 	"log/slog"
 
 	"github.com/GymSquad/archive-api/api"
+	getarchiveddates "github.com/GymSquad/archive-api/internal/features/get-archived-dates"
+	searcharchives "github.com/GymSquad/archive-api/internal/features/search-archives"
 	swaggerui "github.com/GymSquad/archive-api/internal/features/swagger-ui"
+	updatewebsite "github.com/GymSquad/archive-api/internal/features/update-website"
+	"github.com/GymSquad/archive-api/internal/server"
 	"github.com/gin-gonic/gin"
-	"github.com/oapi-codegen/runtime/types"
 )
 
 const (
-	// RootPath is the path to the root of the archive``
-	RootPath = "/archive"
+	// DefaultRootPath is the default root path for the archive
+	DefaultRootPath = "/archive"
 )
 
 func main() {
+	var rootPath string
+	if path, ok := os.LookupEnv("ROOT_PATH"); ok {
+		rootPath = path
+	} else {
+		rootPath = DefaultRootPath
+	}
+
 	r := gin.Default()
 
-	s := &svc{}
-	strictApiHandler := api.NewStrictHandler(s, nil)
+	datesHandler := getarchiveddates.NewHTTPHandler(rootPath)
+	searchHandler := searcharchives.NewHTTPHandler(nil)
+	updateHandler := updatewebsite.NewHTTPHandler(nil)
+
+	aApi := server.NewArchiveAPI(datesHandler, searchHandler, updateHandler)
+	strictApiHandler := api.NewStrictHandler(aApi, nil)
 	api.RegisterHandlers(r, strictApiHandler)
 
 	// Register swagger handlers
@@ -39,65 +50,3 @@ func main() {
 		os.Exit(1)
 	}
 }
-
-type svc struct{}
-
-// GetApiWebsiteSearch implements api.StrictServerInterface.
-func (*svc) GetApiWebsiteSearch(ctx context.Context, request api.GetApiWebsiteSearchRequestObject) (api.GetApiWebsiteSearchResponseObject, error) {
-	var result []api.SearchResultEntry
-	var pagination api.Pagination
-
-	result = append(result, api.SearchResultEntry{
-		Id:         "nctu-administration-library",
-		Campus:     "交大相關",
-		Department: "行政單位",
-		Office:     "圖書館",
-		Websites:   []api.SearchResultWebsiteEntry{},
-	})
-
-	for i := 0; i < 10; i++ {
-		result[0].Websites = append(result[0].Websites, api.SearchResultWebsiteEntry{
-			Id:   strconv.Itoa(i + 1),
-			Name: "交大圖書館",
-			Url:  "https://lib.nctu.edu.tw/",
-		})
-	}
-
-	pagination = api.Pagination{
-		NextCursor:   nil,
-		NumResults:   10,
-		TotalResults: 10,
-	}
-
-	return api.GetApiWebsiteSearch200JSONResponse(api.WebsiteSearchResult{
-		Result:     result,
-		Pagination: pagination,
-	}), nil
-}
-
-// GetApiWebsiteWebsiteId implements api.StrictServerInterface.
-func (*svc) GetApiWebsiteWebsiteId(ctx context.Context, request api.GetApiWebsiteWebsiteIdRequestObject) (api.GetApiWebsiteWebsiteIdResponseObject, error) {
-	var dates []types.Date
-
-	date, err := time.Parse(types.DateFormat, "2021-01-01")
-	if err != nil {
-		return nil, err
-	}
-	dates = append(dates, types.Date{Time: date})
-
-	return api.GetApiWebsiteWebsiteId200JSONResponse(api.ArchivedDates(dates)), nil
-}
-
-// PatchApiWebsiteWebsiteId implements api.StrictServerInterface.
-func (*svc) PatchApiWebsiteWebsiteId(ctx context.Context, request api.PatchApiWebsiteWebsiteIdRequestObject) (api.PatchApiWebsiteWebsiteIdResponseObject, error) {
-	return api.PatchApiWebsiteWebsiteId200JSONResponse(api.Website{
-		Id:         request.WebsiteId,
-		Campus:     "交大相關",
-		Department: "行政單位",
-		Office:     "圖書館",
-		Name:       "交大圖書館",
-		Url:        "https://lib.nctu.edu.tw/",
-	}), nil
-}
-
-var _ api.StrictServerInterface = (*svc)(nil)
