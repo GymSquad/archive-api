@@ -11,10 +11,11 @@ import (
 
 // SearchWebsitesHandler is the handler for the search websites endpoint
 type SearchWebsitesHandler struct {
+	db *sql.DB
 }
 
-// Compile time check to ensure that SearchArchivesHandler implements server.SearchWebsitesHandler.
-var _ server.SearchWebsitesHandler = (*SearchArchivesHandler)(nil)
+// Compile time check to ensure that SearchWebsitesHandler implements server.SearchWebsitesHandler.
+var _ server.SearchWebsitesHandler = (*SearchWebsitesHandler)(nil)
 
 // NewHTTPHandler creates a new SearchArchivesHandler
 func NewHTTPHandler(db *sql.DB) *SearchWebsitesHandler {
@@ -24,7 +25,7 @@ func NewHTTPHandler(db *sql.DB) *SearchWebsitesHandler {
 }
 
 // HandleRequest implements server.SearchWebsitesHandler.
-func (*SearchArchivesHandler) HandleRequest(ctx context.Context, request api.GetApiWebsiteSearchRequestObject) (api.GetApiWebsiteSearchResponseObject, error) {
+func (*SearchWebsitesHandler) HandleRequest(ctx context.Context, request api.SearchWebsitesApiWebsiteSearchGetRequestObject) (api.SearchWebsitesApiWebsiteSearchGetResponseObject, error) {
 	var result []api.SearchResultEntry
 	var pagination api.Pagination
 
