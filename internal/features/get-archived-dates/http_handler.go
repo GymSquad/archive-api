@@ -26,11 +26,14 @@ func NewHTTPHandler(rootPath string) *GetArchiveDatesHandler {
 }
 
 // HandleRequest implements server.GetArchivedDatesHandler.
-func (h *GetArchiveDatesHandler) HandleRequest(ctx context.Context, request api.GetApiWebsiteWebsiteIdRequestObject) (api.GetApiWebsiteWebsiteIdResponseObject, error) {
+func (h *GetArchiveDatesHandler) HandleRequest(
+	ctx context.Context,
+	request api.GetArchivedDatesApiWebsiteWebsiteIdGetRequestObject,
+) (api.GetArchivedDatesApiWebsiteWebsiteIdGetResponseObject, error) {
 	archiveId := request.WebsiteId
 	entries, err := os.ReadDir(filepath.Join(h.RootPath, archiveId))
 	if err != nil {
-		return api.GetApiWebsiteWebsiteId404JSONResponse("archive for the specified id not found"), nil
+		return api.GetArchivedDatesApiWebsiteWebsiteIdGet404JSONResponse("archive for the specified id not found"), nil
 	}
 
 	dates := []string{}
@@ -41,7 +44,7 @@ func (h *GetArchiveDatesHandler) HandleRequest(ctx context.Context, request api.
 		dates = append(dates, entry.Name())
 	}
 
-	return api.GetApiWebsiteWebsiteId200JSONResponse(dates), nil
+	return api.GetArchivedDatesApiWebsiteWebsiteIdGet200JSONResponse(dates), nil
 }
 
 func isDate(date string) bool {
