@@ -1,236 +1,457 @@
-openapi: "3.1.0"
-
+openapi: 3.1.0
 info:
-  title: "WebArchive API"
-  description: "Minimal API for NYCU Library Web Archive Project"
-  version: "0.0.0"
-  servers:
-    - url: "http://localhost:8080"
-      description: "Development server"
-
+  title: WebArchive API
+  summary: Minimal API for NYCU Library Web Archive Project
+  version: 0.0.0
 paths:
-  /api/website/{website_id}:
+  "/api/website/{website_id}":
     get:
-      description: "Get the archived dates of a website"
-      summary: "Get archived dates"
-      tags: [Website]
+      tags:
+        - archive
+      summary: Get Archived Dates
+      description: Get archived dates of a website
+      operationId: get_archived_dates_api_website__website_id__get
       parameters:
         - name: website_id
           in: path
-          description: "Website ID"
           required: true
           schema:
             type: string
+            title: Website Id
       responses:
         "200":
-          description: "Successful response"
+          description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ArchivedDates"
+                type: array
+                items:
+                  type: string
+                title: Response Get Archived Dates Api Website  Website Id  Get
+              example:
+                - "2021-01-01"
+                - "2021-01-02"
+                - "2021-01-03"
         "404":
-          description: "Website not found"
+          description: Website not found
           content:
             application/json:
               schema:
                 type: string
-                example: "Not found"
+              example: Not found
+
     patch:
-      description: "Update the information of a website"
-      summary: "Update website"
-      tags: [Website]
+      tags:
+        - website
+      summary: Update Website
+      description: Update the information of a website
+      operationId: update_website_api_website__website_id__patch
       parameters:
         - name: website_id
           in: path
-          description: "Website ID"
           required: true
           schema:
             type: string
+            title: Website Id
       requestBody:
-        description: "Website information to be updated"
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateWebsitePayload"
+              "$ref": "#/components/schemas/UpdateWebsitePayload"
       responses:
         "200":
-          description: "Successful response"
+          description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Website"
+                "$ref": "#/components/schemas/UpdatedWebsite"
+        "404":
+          description: Website not found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/WebsiteNotFound"
 
-  /api/website/search:
+  "/api/website/search":
     get:
-      description: "Search websites"
-      summary: "Search websites"
-      tags: [Website]
+      tags:
+        - website
+      summary: Search Websites
+      description: Search websites
+      operationId: search_websites_api_website_search_get
       parameters:
         - name: q
           in: query
-          description: "Search query"
           required: false
           schema:
             type: string
+            description: Search query
+            title: Q
+          description: Search query
         - name: cursor
           in: query
-          description: "Cursor for pagination"
           required: false
           schema:
             type: string
+            description: Cursor for pagination
+            title: Cursor
+          description: Cursor for pagination
         - name: limit
           in: query
-          description: "Limit for pagination"
           required: false
           schema:
             type: integer
-            minimum: 1
             maximum: 50
+            minimum: 1
+            description: Limit for pagination
             default: 10
+            title: Limit
+          description: Limit for pagination
       responses:
         "200":
-          description: "Successful response"
+          description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/WebsiteSearchResult"
+                "$ref": "#/components/schemas/SearchResult"
         "400":
-          description: "Invalid cursor or limit"
+          description: Invalid payload
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "Invalid cursor"
-        "500":
-          description: "Internal server error"
+                "$ref": "#/components/schemas/InvalidPayload"
+
+  "/api/campus":
+    get:
+      tags:
+        - campus
+      summary: Get All Campuses
+      description: Get all campuses
+      operationId: get_all_campuses_api_campus_get
+      responses:
+        "200":
+          description: Successful Response
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "Internal server error"
+                items:
+                  "$ref": "#/components/schemas/Campus"
+                type: array
+                title: Response Get All Campuses Api Campus Get
+
+  "/api/campus/{campus_id}/department":
+    get:
+      tags:
+        - department
+      summary: Get All Departments
+      description: Get all departments of a campus
+      operationId: get_all_departments_api_campus__campus_id__department_get
+      parameters:
+        - name: campus_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Campus Id
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/Department"
+                title:
+                  Response Get All Departments Api Campus  Campus Id  Department
+                  Get
+
+  "/api/department/{department_id}/office":
+    get:
+      tags:
+        - office
+      summary: Get All Offices
+      description: Get all offices of a department
+      operationId: get_all_offices_api_department__department_id__office_get
+      parameters:
+        - name: department_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Department Id
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/Office"
+                title:
+                  Response Get All Offices Api Department  Department Id  Office
+                  Get
 
 components:
   schemas:
-    ArchivedDates:
-      type: array
-      items:
-        type: string
-
     Affiliation:
-      type: object
-      required: [campus, department, office]
       properties:
-        campus:
-          description: "Campus name"
+        campus_id:
           type: string
-          example: "交大相關"
-        department:
-          description: "Department name"
+          title: Campus Id
+          examples:
+            - clpl85gua0000356ribtcvv9d
+        campus_name:
           type: string
-          example: "行政單位"
-        office:
-          description: "Office name"
+          title: Campus Name
+          examples:
+            - 交大相關
+        department_id:
           type: string
-          example: "圖書館"
-
-    Website:
-      allOf:
-        - $ref: "#/components/schemas/Affiliation"
-        - type: object
-          required: [id, name, url]
-          properties:
-            id:
-              description: "Website ID"
-              type: string
-            name:
-              description: "Website name"
-              type: string
-              example: "交通大學圖書館"
-            url:
-              description: "Website URL"
-              type: string
-              example: "http://www.lib.nctu.edu.tw/"
-
-    UpdateWebsitePayload:
+          title: Department Id
+          examples:
+            - clpl862ag0000356qdt2gy68z
+        department_name:
+          type: string
+          title: Department Name
+          examples:
+            - 行政單位
+        office_id:
+          type: string
+          title: Office Id
+          examples:
+            - clpl869zn0000356qjk6mc5zu
+        office_name:
+          type: string
+          title: Office Name
+          examples:
+            - 圖書館
       type: object
-      properties:
-        affiliation:
-          description: "Affiliations of the website"
-          type: array
-          items:
-            $ref: "#/components/schemas/Affiliation"
-        name:
-          description: "Website name"
-          type: string
-          example: "交通大學圖書館"
-        url:
-          description: "Website URL"
-          type: string
-          example: "http://www.lib.nctu.edu.tw/"
-
-    WebsiteSearchResult:
-      type: object
-      required: [result, pagination]
-      properties:
-        result:
-          type: array
-          items:
-            $ref: "#/components/schemas/SearchResultEntry"
-
-        pagination:
-          $ref: "#/components/schemas/Pagination"
-
-    SearchResultEntry:
-      allOf:
-        - $ref: "#/components/schemas/Affiliation"
-        - type: object
-          required: [id, websites]
-          properties:
-            id:
-              description: "Composite ID made of campus, department, and office"
-              type: string
-              example: "campus-id$department-id$office-id"
-            websites:
-              type: array
-              items:
-                $ref: "#/components/schemas/SearchResultWebsiteEntry"
-
-    SearchResultWebsiteEntry:
-      type: object
-      required: [id, name, url]
+      required:
+        - campus_id
+        - campus_name
+        - department_id
+        - department_name
+        - office_id
+        - office_name
+      title: Affiliation
+    Campus:
       properties:
         id:
-          description: "Website ID"
           type: string
+          title: Id
+          examples:
+            - clpl85gua0000356ribtcvv9d
         name:
-          description: "Website name"
           type: string
-          example: "交通大學圖書館"
-        url:
-          description: "Website URL"
-          type: string
-          example: "http://www.lib.nctu.edu.tw/"
-
-    Pagination:
+          title: Name
+          examples:
+            - 交大相關
       type: object
-      required: [next_cursor, num_results, total_results]
+      required:
+        - id
+        - name
+      title: Campus
+    Department:
+      properties:
+        id:
+          type: string
+          title: Id
+          examples:
+            - clpl862ag0000356qdt2gy68z
+        name:
+          type: string
+          title: Name
+          examples:
+            - 行政單位
+      type: object
+      required:
+        - id
+        - name
+      title: Department
+    InvalidPayload:
+      properties:
+        error:
+          type: string
+          title: Error
+          examples:
+            - Invalid cursor
+      type: object
+      required:
+        - error
+      title: InvalidPayload
+    Office:
+      properties:
+        id:
+          type: string
+          title: Id
+          examples:
+            - clpl869zn0000356qjk6mc5zu
+        name:
+          type: string
+          title: Name
+          examples:
+            - 圖書館
+      type: object
+      required:
+        - id
+        - name
+      title: Office
+    Pagination:
       properties:
         next_cursor:
-          description: "Cursor for next page"
           type: string
-          nullable: true
+          title: Next Cursor
+          examples:
+            - Base64EncodedCursor=
         num_results:
-          description: "Number of websites returned in this page"
           type: integer
-          minimum: 0
+          title: Num Results
+          examples:
+            - 1
         total_results:
-          description: "Total number of websites"
           type: integer
-          minimum: 0
+          title: Total Results
+          examples:
+            - 1000
+      type: object
+      required:
+        - cursor
+        - num_results
+        - total_results
+      title: Pagination
+    SearchResult:
+      properties:
+        result:
+          items:
+            "$ref": "#/components/schemas/SearchResultEntry"
+          type: array
+          title: Result
+        pagination:
+          "$ref": "#/components/schemas/Pagination"
+      type: object
+      required:
+        - result
+        - pagination
+      title: SearchResult
+    SearchResultEntry:
+      properties:
+        id:
+          type: string
+          title: Id
+          examples:
+            - clpl85gua0000356ribtcvv9d$clpl862ag0000356qdt2gy68z$clpl869zn0000356qjk6mc5zu
+        campus:
+          type: string
+          title: Campus
+          examples:
+            - 交大相關
+        department:
+          type: string
+          title: Department
+          examples:
+            - 行政單位
+        office:
+          type: string
+          title: Office
+          examples:
+            - 圖書館
+        websites:
+          items:
+            "$ref": "#/components/schemas/Website"
+          type: array
+          title: Websites
+      type: object
+      required:
+        - id
+        - campus
+        - department
+        - office
+        - websites
+      title: SearchResultEntry
+    UpdateWebsitePayload:
+      properties:
+        name:
+          type: string
+          title: Name
+          examples:
+            - 交通大學圖書館
+        url:
+          type: string
+          title: Url
+          examples:
+            - https://new.lib.nctu.edu.tw/
+        office_ids:
+          type: array
+          items:
+            type: string
+          title: Office Ids
+          examples:
+            - - clpl869zn0000356qjk6mc5zu
+      type: object
+      title: UpdateWebsitePayload
+    UpdatedWebsite:
+      properties:
+        id:
+          type: string
+          title: Id
+          examples:
+            - clpl86hkn0000356qz6mb44lv
+        name:
+          type: string
+          title: Name
+          examples:
+            - 交通大學圖書館
+        url:
+          type: string
+          title: Url
+          examples:
+            - https://new.lib.nctu.edu.tw/
+        affiliations:
+          items:
+            "$ref": "#/components/schemas/Affiliation"
+          type: array
+          title: Affiliations
+      type: object
+      required:
+        - id
+        - name
+        - url
+        - affiliations
+      title: UpdatedWebsite
+    Website:
+      properties:
+        id:
+          type: string
+          title: Id
+          examples:
+            - clpl86hkn0000356qz6mb44lv
+        name:
+          type: string
+          title: Name
+          examples:
+            - 交通大學圖書館
+        url:
+          type: string
+          title: Url
+          examples:
+            - https://www.lib.nctu.edu.tw/
+      type: object
+      required:
+        - id
+        - name
+        - url
+      title: Website
+    WebsiteNotFound:
+      properties:
+        error:
+          type: string
+          title: Error
+          examples:
+            - Website not found
+      type: object
+      required:
+        - error
+      title: WebsiteNotFound

@@ -24,13 +24,20 @@ func NewHTTPHandler(db *sql.DB) *UpdateWebsiteHandler {
 }
 
 // HandleRequest implements server.SearchWebsitesHandler.
-func (*UpdateWebsiteHandler) HandleRequest(ctx context.Context, request api.PatchApiWebsiteWebsiteIdRequestObject) (api.PatchApiWebsiteWebsiteIdResponseObject, error) {
-	return api.PatchApiWebsiteWebsiteId200JSONResponse(api.Website{
-		Id:         request.WebsiteId,
-		Campus:     "交大相關",
-		Department: "行政單位",
-		Office:     "圖書館",
-		Name:       "交大圖書館",
-		Url:        "https://lib.nctu.edu.tw/",
+func (h *UpdateWebsiteHandler) HandleRequest(ctx context.Context, request api.UpdateWebsiteApiWebsiteWebsiteIdPatchRequestObject) (api.UpdateWebsiteApiWebsiteWebsiteIdPatchResponseObject, error) {
+	return api.UpdateWebsiteApiWebsiteWebsiteIdPatch200JSONResponse(api.UpdatedWebsite{
+		Id:   request.WebsiteId,
+		Name: "交大圖書館",
+		Url:  "https://lib.nctu.edu.tw/",
+		Affiliations: []api.Affiliation{
+			{
+				CampusId:       "clpl85gua0000356ribtcvv9d",
+				CampusName:     "交大相關",
+				DepartmentId:   "clpl862ag0000356qdt2gy68z",
+				DepartmentName: "行政單位",
+				OfficeId:       "clpl869zn0000356qjk6mc5zu",
+				OfficeName:     "圖書館",
+			},
+		},
 	}), nil
 }

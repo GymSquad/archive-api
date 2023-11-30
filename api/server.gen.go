@@ -23,15 +23,24 @@ import (
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
-	// Search websites
+	// Get All Campuses
+	// (GET /api/campus)
+	GetAllCampusesApiCampusGet(c *gin.Context)
+	// Get All Departments
+	// (GET /api/campus/{campus_id}/department)
+	GetAllDepartmentsApiCampusCampusIdDepartmentGet(c *gin.Context, campusId string)
+	// Get All Offices
+	// (GET /api/department/{department_id}/office)
+	GetAllOfficesApiDepartmentDepartmentIdOfficeGet(c *gin.Context, departmentId string)
+	// Search Websites
 	// (GET /api/website/search)
-	GetApiWebsiteSearch(c *gin.Context, params GetApiWebsiteSearchParams)
-	// Get archived dates
+	SearchWebsitesApiWebsiteSearchGet(c *gin.Context, params SearchWebsitesApiWebsiteSearchGetParams)
+	// Get Archived Dates
 	// (GET /api/website/{website_id})
-	GetApiWebsiteWebsiteId(c *gin.Context, websiteId string)
-	// Update website
+	GetArchivedDatesApiWebsiteWebsiteIdGet(c *gin.Context, websiteId string)
+	// Update Website
 	// (PATCH /api/website/{website_id})
-	PatchApiWebsiteWebsiteId(c *gin.Context, websiteId string)
+	UpdateWebsiteApiWebsiteWebsiteIdPatch(c *gin.Context, websiteId string)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -43,13 +52,74 @@ type ServerInterfaceWrapper struct {
 
 type MiddlewareFunc func(c *gin.Context)
 
-// GetApiWebsiteSearch operation middleware
-func (siw *ServerInterfaceWrapper) GetApiWebsiteSearch(c *gin.Context) {
+// GetAllCampusesApiCampusGet operation middleware
+func (siw *ServerInterfaceWrapper) GetAllCampusesApiCampusGet(c *gin.Context) {
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+
+	siw.Handler.GetAllCampusesApiCampusGet(c)
+}
+
+// GetAllDepartmentsApiCampusCampusIdDepartmentGet operation middleware
+func (siw *ServerInterfaceWrapper) GetAllDepartmentsApiCampusCampusIdDepartmentGet(c *gin.Context) {
+
+	var err error
+
+	// ------------- Path parameter "campus_id" -------------
+	var campusId string
+
+	err = runtime.BindStyledParameter("simple", false, "campus_id", c.Param("campus_id"), &campusId)
+	if err != nil {
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter campus_id: %w", err), http.StatusBadRequest)
+		return
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+
+	siw.Handler.GetAllDepartmentsApiCampusCampusIdDepartmentGet(c, campusId)
+}
+
+// GetAllOfficesApiDepartmentDepartmentIdOfficeGet operation middleware
+func (siw *ServerInterfaceWrapper) GetAllOfficesApiDepartmentDepartmentIdOfficeGet(c *gin.Context) {
+
+	var err error
+
+	// ------------- Path parameter "department_id" -------------
+	var departmentId string
+
+	err = runtime.BindStyledParameter("simple", false, "department_id", c.Param("department_id"), &departmentId)
+	if err != nil {
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter department_id: %w", err), http.StatusBadRequest)
+		return
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+
+	siw.Handler.GetAllOfficesApiDepartmentDepartmentIdOfficeGet(c, departmentId)
+}
+
+// SearchWebsitesApiWebsiteSearchGet operation middleware
+func (siw *ServerInterfaceWrapper) SearchWebsitesApiWebsiteSearchGet(c *gin.Context) {
 
 	var err error
 
 	// Parameter object where we will unmarshal all parameters from the context
-	var params GetApiWebsiteSearchParams
+	var params SearchWebsitesApiWebsiteSearchGetParams
 
 	// ------------- Optional query parameter "q" -------------
 
@@ -82,11 +152,11 @@ func (siw *ServerInterfaceWrapper) GetApiWebsiteSearch(c *gin.Context) {
 		}
 	}
 
-	siw.Handler.GetApiWebsiteSearch(c, params)
+	siw.Handler.SearchWebsitesApiWebsiteSearchGet(c, params)
 }
 
-// GetApiWebsiteWebsiteId operation middleware
-func (siw *ServerInterfaceWrapper) GetApiWebsiteWebsiteId(c *gin.Context) {
+// GetArchivedDatesApiWebsiteWebsiteIdGet operation middleware
+func (siw *ServerInterfaceWrapper) GetArchivedDatesApiWebsiteWebsiteIdGet(c *gin.Context) {
 
 	var err error
 
@@ -106,11 +176,11 @@ func (siw *ServerInterfaceWrapper) GetApiWebsiteWebsiteId(c *gin.Context) {
 		}
 	}
 
-	siw.Handler.GetApiWebsiteWebsiteId(c, websiteId)
+	siw.Handler.GetArchivedDatesApiWebsiteWebsiteIdGet(c, websiteId)
 }
 
-// PatchApiWebsiteWebsiteId operation middleware
-func (siw *ServerInterfaceWrapper) PatchApiWebsiteWebsiteId(c *gin.Context) {
+// UpdateWebsiteApiWebsiteWebsiteIdPatch operation middleware
+func (siw *ServerInterfaceWrapper) UpdateWebsiteApiWebsiteWebsiteIdPatch(c *gin.Context) {
 
 	var err error
 
@@ -130,7 +200,7 @@ func (siw *ServerInterfaceWrapper) PatchApiWebsiteWebsiteId(c *gin.Context) {
 		}
 	}
 
-	siw.Handler.PatchApiWebsiteWebsiteId(c, websiteId)
+	siw.Handler.UpdateWebsiteApiWebsiteWebsiteIdPatch(c, websiteId)
 }
 
 // GinServerOptions provides options for the Gin server.
@@ -160,105 +230,163 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 		ErrorHandler:       errorHandler,
 	}
 
-	router.GET(options.BaseURL+"/api/website/search", wrapper.GetApiWebsiteSearch)
-	router.GET(options.BaseURL+"/api/website/:website_id", wrapper.GetApiWebsiteWebsiteId)
-	router.PATCH(options.BaseURL+"/api/website/:website_id", wrapper.PatchApiWebsiteWebsiteId)
+	router.GET(options.BaseURL+"/api/campus", wrapper.GetAllCampusesApiCampusGet)
+	router.GET(options.BaseURL+"/api/campus/:campus_id/department", wrapper.GetAllDepartmentsApiCampusCampusIdDepartmentGet)
+	router.GET(options.BaseURL+"/api/department/:department_id/office", wrapper.GetAllOfficesApiDepartmentDepartmentIdOfficeGet)
+	router.GET(options.BaseURL+"/api/website/search", wrapper.SearchWebsitesApiWebsiteSearchGet)
+	router.GET(options.BaseURL+"/api/website/:website_id", wrapper.GetArchivedDatesApiWebsiteWebsiteIdGet)
+	router.PATCH(options.BaseURL+"/api/website/:website_id", wrapper.UpdateWebsiteApiWebsiteWebsiteIdPatch)
 }
 
-type GetApiWebsiteSearchRequestObject struct {
-	Params GetApiWebsiteSearchParams
+type GetAllCampusesApiCampusGetRequestObject struct {
 }
 
-type GetApiWebsiteSearchResponseObject interface {
-	VisitGetApiWebsiteSearchResponse(w http.ResponseWriter) error
+type GetAllCampusesApiCampusGetResponseObject interface {
+	VisitGetAllCampusesApiCampusGetResponse(w http.ResponseWriter) error
 }
 
-type GetApiWebsiteSearch200JSONResponse WebsiteSearchResult
+type GetAllCampusesApiCampusGet200JSONResponse []Campus
 
-func (response GetApiWebsiteSearch200JSONResponse) VisitGetApiWebsiteSearchResponse(w http.ResponseWriter) error {
+func (response GetAllCampusesApiCampusGet200JSONResponse) VisitGetAllCampusesApiCampusGetResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetApiWebsiteSearch400JSONResponse struct {
-	Error *string `json:"error,omitempty"`
+type GetAllDepartmentsApiCampusCampusIdDepartmentGetRequestObject struct {
+	CampusId string `json:"campus_id"`
 }
 
-func (response GetApiWebsiteSearch400JSONResponse) VisitGetApiWebsiteSearchResponse(w http.ResponseWriter) error {
+type GetAllDepartmentsApiCampusCampusIdDepartmentGetResponseObject interface {
+	VisitGetAllDepartmentsApiCampusCampusIdDepartmentGetResponse(w http.ResponseWriter) error
+}
+
+type GetAllDepartmentsApiCampusCampusIdDepartmentGet200JSONResponse []Department
+
+func (response GetAllDepartmentsApiCampusCampusIdDepartmentGet200JSONResponse) VisitGetAllDepartmentsApiCampusCampusIdDepartmentGetResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetAllOfficesApiDepartmentDepartmentIdOfficeGetRequestObject struct {
+	DepartmentId string `json:"department_id"`
+}
+
+type GetAllOfficesApiDepartmentDepartmentIdOfficeGetResponseObject interface {
+	VisitGetAllOfficesApiDepartmentDepartmentIdOfficeGetResponse(w http.ResponseWriter) error
+}
+
+type GetAllOfficesApiDepartmentDepartmentIdOfficeGet200JSONResponse []Office
+
+func (response GetAllOfficesApiDepartmentDepartmentIdOfficeGet200JSONResponse) VisitGetAllOfficesApiDepartmentDepartmentIdOfficeGetResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type SearchWebsitesApiWebsiteSearchGetRequestObject struct {
+	Params SearchWebsitesApiWebsiteSearchGetParams
+}
+
+type SearchWebsitesApiWebsiteSearchGetResponseObject interface {
+	VisitSearchWebsitesApiWebsiteSearchGetResponse(w http.ResponseWriter) error
+}
+
+type SearchWebsitesApiWebsiteSearchGet200JSONResponse SearchResult
+
+func (response SearchWebsitesApiWebsiteSearchGet200JSONResponse) VisitSearchWebsitesApiWebsiteSearchGetResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type SearchWebsitesApiWebsiteSearchGet400JSONResponse InvalidPayload
+
+func (response SearchWebsitesApiWebsiteSearchGet400JSONResponse) VisitSearchWebsitesApiWebsiteSearchGetResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(400)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetApiWebsiteSearch500JSONResponse struct {
-	Error *string `json:"error,omitempty"`
-}
-
-func (response GetApiWebsiteSearch500JSONResponse) VisitGetApiWebsiteSearchResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type GetApiWebsiteWebsiteIdRequestObject struct {
+type GetArchivedDatesApiWebsiteWebsiteIdGetRequestObject struct {
 	WebsiteId string `json:"website_id"`
 }
 
-type GetApiWebsiteWebsiteIdResponseObject interface {
-	VisitGetApiWebsiteWebsiteIdResponse(w http.ResponseWriter) error
+type GetArchivedDatesApiWebsiteWebsiteIdGetResponseObject interface {
+	VisitGetArchivedDatesApiWebsiteWebsiteIdGetResponse(w http.ResponseWriter) error
 }
 
-type GetApiWebsiteWebsiteId200JSONResponse ArchivedDates
+type GetArchivedDatesApiWebsiteWebsiteIdGet200JSONResponse []string
 
-func (response GetApiWebsiteWebsiteId200JSONResponse) VisitGetApiWebsiteWebsiteIdResponse(w http.ResponseWriter) error {
+func (response GetArchivedDatesApiWebsiteWebsiteIdGet200JSONResponse) VisitGetArchivedDatesApiWebsiteWebsiteIdGetResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetApiWebsiteWebsiteId404JSONResponse string
+type GetArchivedDatesApiWebsiteWebsiteIdGet404JSONResponse string
 
-func (response GetApiWebsiteWebsiteId404JSONResponse) VisitGetApiWebsiteWebsiteIdResponse(w http.ResponseWriter) error {
+func (response GetArchivedDatesApiWebsiteWebsiteIdGet404JSONResponse) VisitGetArchivedDatesApiWebsiteWebsiteIdGetResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PatchApiWebsiteWebsiteIdRequestObject struct {
+type UpdateWebsiteApiWebsiteWebsiteIdPatchRequestObject struct {
 	WebsiteId string `json:"website_id"`
-	Body      *PatchApiWebsiteWebsiteIdJSONRequestBody
+	Body      *UpdateWebsiteApiWebsiteWebsiteIdPatchJSONRequestBody
 }
 
-type PatchApiWebsiteWebsiteIdResponseObject interface {
-	VisitPatchApiWebsiteWebsiteIdResponse(w http.ResponseWriter) error
+type UpdateWebsiteApiWebsiteWebsiteIdPatchResponseObject interface {
+	VisitUpdateWebsiteApiWebsiteWebsiteIdPatchResponse(w http.ResponseWriter) error
 }
 
-type PatchApiWebsiteWebsiteId200JSONResponse Website
+type UpdateWebsiteApiWebsiteWebsiteIdPatch200JSONResponse UpdatedWebsite
 
-func (response PatchApiWebsiteWebsiteId200JSONResponse) VisitPatchApiWebsiteWebsiteIdResponse(w http.ResponseWriter) error {
+func (response UpdateWebsiteApiWebsiteWebsiteIdPatch200JSONResponse) VisitUpdateWebsiteApiWebsiteWebsiteIdPatchResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
+type UpdateWebsiteApiWebsiteWebsiteIdPatch404JSONResponse WebsiteNotFound
+
+func (response UpdateWebsiteApiWebsiteWebsiteIdPatch404JSONResponse) VisitUpdateWebsiteApiWebsiteWebsiteIdPatchResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
-	// Search websites
+	// Get All Campuses
+	// (GET /api/campus)
+	GetAllCampusesApiCampusGet(ctx context.Context, request GetAllCampusesApiCampusGetRequestObject) (GetAllCampusesApiCampusGetResponseObject, error)
+	// Get All Departments
+	// (GET /api/campus/{campus_id}/department)
+	GetAllDepartmentsApiCampusCampusIdDepartmentGet(ctx context.Context, request GetAllDepartmentsApiCampusCampusIdDepartmentGetRequestObject) (GetAllDepartmentsApiCampusCampusIdDepartmentGetResponseObject, error)
+	// Get All Offices
+	// (GET /api/department/{department_id}/office)
+	GetAllOfficesApiDepartmentDepartmentIdOfficeGet(ctx context.Context, request GetAllOfficesApiDepartmentDepartmentIdOfficeGetRequestObject) (GetAllOfficesApiDepartmentDepartmentIdOfficeGetResponseObject, error)
+	// Search Websites
 	// (GET /api/website/search)
-	GetApiWebsiteSearch(ctx context.Context, request GetApiWebsiteSearchRequestObject) (GetApiWebsiteSearchResponseObject, error)
-	// Get archived dates
+	SearchWebsitesApiWebsiteSearchGet(ctx context.Context, request SearchWebsitesApiWebsiteSearchGetRequestObject) (SearchWebsitesApiWebsiteSearchGetResponseObject, error)
+	// Get Archived Dates
 	// (GET /api/website/{website_id})
-	GetApiWebsiteWebsiteId(ctx context.Context, request GetApiWebsiteWebsiteIdRequestObject) (GetApiWebsiteWebsiteIdResponseObject, error)
-	// Update website
+	GetArchivedDatesApiWebsiteWebsiteIdGet(ctx context.Context, request GetArchivedDatesApiWebsiteWebsiteIdGetRequestObject) (GetArchivedDatesApiWebsiteWebsiteIdGetResponseObject, error)
+	// Update Website
 	// (PATCH /api/website/{website_id})
-	PatchApiWebsiteWebsiteId(ctx context.Context, request PatchApiWebsiteWebsiteIdRequestObject) (PatchApiWebsiteWebsiteIdResponseObject, error)
+	UpdateWebsiteApiWebsiteWebsiteIdPatch(ctx context.Context, request UpdateWebsiteApiWebsiteWebsiteIdPatchRequestObject) (UpdateWebsiteApiWebsiteWebsiteIdPatchResponseObject, error)
 }
 
 type StrictHandlerFunc = strictgin.StrictGinHandlerFunc
@@ -273,17 +401,96 @@ type strictHandler struct {
 	middlewares []StrictMiddlewareFunc
 }
 
-// GetApiWebsiteSearch operation middleware
-func (sh *strictHandler) GetApiWebsiteSearch(ctx *gin.Context, params GetApiWebsiteSearchParams) {
-	var request GetApiWebsiteSearchRequestObject
+// GetAllCampusesApiCampusGet operation middleware
+func (sh *strictHandler) GetAllCampusesApiCampusGet(ctx *gin.Context) {
+	var request GetAllCampusesApiCampusGetRequestObject
+
+	handler := func(ctx *gin.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.GetAllCampusesApiCampusGet(ctx, request.(GetAllCampusesApiCampusGetRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetAllCampusesApiCampusGet")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		ctx.Error(err)
+		ctx.Status(http.StatusInternalServerError)
+	} else if validResponse, ok := response.(GetAllCampusesApiCampusGetResponseObject); ok {
+		if err := validResponse.VisitGetAllCampusesApiCampusGetResponse(ctx.Writer); err != nil {
+			ctx.Error(err)
+		}
+	} else if response != nil {
+		ctx.Error(fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetAllDepartmentsApiCampusCampusIdDepartmentGet operation middleware
+func (sh *strictHandler) GetAllDepartmentsApiCampusCampusIdDepartmentGet(ctx *gin.Context, campusId string) {
+	var request GetAllDepartmentsApiCampusCampusIdDepartmentGetRequestObject
+
+	request.CampusId = campusId
+
+	handler := func(ctx *gin.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.GetAllDepartmentsApiCampusCampusIdDepartmentGet(ctx, request.(GetAllDepartmentsApiCampusCampusIdDepartmentGetRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetAllDepartmentsApiCampusCampusIdDepartmentGet")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		ctx.Error(err)
+		ctx.Status(http.StatusInternalServerError)
+	} else if validResponse, ok := response.(GetAllDepartmentsApiCampusCampusIdDepartmentGetResponseObject); ok {
+		if err := validResponse.VisitGetAllDepartmentsApiCampusCampusIdDepartmentGetResponse(ctx.Writer); err != nil {
+			ctx.Error(err)
+		}
+	} else if response != nil {
+		ctx.Error(fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetAllOfficesApiDepartmentDepartmentIdOfficeGet operation middleware
+func (sh *strictHandler) GetAllOfficesApiDepartmentDepartmentIdOfficeGet(ctx *gin.Context, departmentId string) {
+	var request GetAllOfficesApiDepartmentDepartmentIdOfficeGetRequestObject
+
+	request.DepartmentId = departmentId
+
+	handler := func(ctx *gin.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.GetAllOfficesApiDepartmentDepartmentIdOfficeGet(ctx, request.(GetAllOfficesApiDepartmentDepartmentIdOfficeGetRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetAllOfficesApiDepartmentDepartmentIdOfficeGet")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		ctx.Error(err)
+		ctx.Status(http.StatusInternalServerError)
+	} else if validResponse, ok := response.(GetAllOfficesApiDepartmentDepartmentIdOfficeGetResponseObject); ok {
+		if err := validResponse.VisitGetAllOfficesApiDepartmentDepartmentIdOfficeGetResponse(ctx.Writer); err != nil {
+			ctx.Error(err)
+		}
+	} else if response != nil {
+		ctx.Error(fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// SearchWebsitesApiWebsiteSearchGet operation middleware
+func (sh *strictHandler) SearchWebsitesApiWebsiteSearchGet(ctx *gin.Context, params SearchWebsitesApiWebsiteSearchGetParams) {
+	var request SearchWebsitesApiWebsiteSearchGetRequestObject
 
 	request.Params = params
 
 	handler := func(ctx *gin.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.GetApiWebsiteSearch(ctx, request.(GetApiWebsiteSearchRequestObject))
+		return sh.ssi.SearchWebsitesApiWebsiteSearchGet(ctx, request.(SearchWebsitesApiWebsiteSearchGetRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetApiWebsiteSearch")
+		handler = middleware(handler, "SearchWebsitesApiWebsiteSearchGet")
 	}
 
 	response, err := handler(ctx, request)
@@ -291,8 +498,8 @@ func (sh *strictHandler) GetApiWebsiteSearch(ctx *gin.Context, params GetApiWebs
 	if err != nil {
 		ctx.Error(err)
 		ctx.Status(http.StatusInternalServerError)
-	} else if validResponse, ok := response.(GetApiWebsiteSearchResponseObject); ok {
-		if err := validResponse.VisitGetApiWebsiteSearchResponse(ctx.Writer); err != nil {
+	} else if validResponse, ok := response.(SearchWebsitesApiWebsiteSearchGetResponseObject); ok {
+		if err := validResponse.VisitSearchWebsitesApiWebsiteSearchGetResponse(ctx.Writer); err != nil {
 			ctx.Error(err)
 		}
 	} else if response != nil {
@@ -300,17 +507,17 @@ func (sh *strictHandler) GetApiWebsiteSearch(ctx *gin.Context, params GetApiWebs
 	}
 }
 
-// GetApiWebsiteWebsiteId operation middleware
-func (sh *strictHandler) GetApiWebsiteWebsiteId(ctx *gin.Context, websiteId string) {
-	var request GetApiWebsiteWebsiteIdRequestObject
+// GetArchivedDatesApiWebsiteWebsiteIdGet operation middleware
+func (sh *strictHandler) GetArchivedDatesApiWebsiteWebsiteIdGet(ctx *gin.Context, websiteId string) {
+	var request GetArchivedDatesApiWebsiteWebsiteIdGetRequestObject
 
 	request.WebsiteId = websiteId
 
 	handler := func(ctx *gin.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.GetApiWebsiteWebsiteId(ctx, request.(GetApiWebsiteWebsiteIdRequestObject))
+		return sh.ssi.GetArchivedDatesApiWebsiteWebsiteIdGet(ctx, request.(GetArchivedDatesApiWebsiteWebsiteIdGetRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetApiWebsiteWebsiteId")
+		handler = middleware(handler, "GetArchivedDatesApiWebsiteWebsiteIdGet")
 	}
 
 	response, err := handler(ctx, request)
@@ -318,8 +525,8 @@ func (sh *strictHandler) GetApiWebsiteWebsiteId(ctx *gin.Context, websiteId stri
 	if err != nil {
 		ctx.Error(err)
 		ctx.Status(http.StatusInternalServerError)
-	} else if validResponse, ok := response.(GetApiWebsiteWebsiteIdResponseObject); ok {
-		if err := validResponse.VisitGetApiWebsiteWebsiteIdResponse(ctx.Writer); err != nil {
+	} else if validResponse, ok := response.(GetArchivedDatesApiWebsiteWebsiteIdGetResponseObject); ok {
+		if err := validResponse.VisitGetArchivedDatesApiWebsiteWebsiteIdGetResponse(ctx.Writer); err != nil {
 			ctx.Error(err)
 		}
 	} else if response != nil {
@@ -327,13 +534,13 @@ func (sh *strictHandler) GetApiWebsiteWebsiteId(ctx *gin.Context, websiteId stri
 	}
 }
 
-// PatchApiWebsiteWebsiteId operation middleware
-func (sh *strictHandler) PatchApiWebsiteWebsiteId(ctx *gin.Context, websiteId string) {
-	var request PatchApiWebsiteWebsiteIdRequestObject
+// UpdateWebsiteApiWebsiteWebsiteIdPatch operation middleware
+func (sh *strictHandler) UpdateWebsiteApiWebsiteWebsiteIdPatch(ctx *gin.Context, websiteId string) {
+	var request UpdateWebsiteApiWebsiteWebsiteIdPatchRequestObject
 
 	request.WebsiteId = websiteId
 
-	var body PatchApiWebsiteWebsiteIdJSONRequestBody
+	var body UpdateWebsiteApiWebsiteWebsiteIdPatchJSONRequestBody
 	if err := ctx.ShouldBind(&body); err != nil {
 		ctx.Status(http.StatusBadRequest)
 		ctx.Error(err)
@@ -342,10 +549,10 @@ func (sh *strictHandler) PatchApiWebsiteWebsiteId(ctx *gin.Context, websiteId st
 	request.Body = &body
 
 	handler := func(ctx *gin.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.PatchApiWebsiteWebsiteId(ctx, request.(PatchApiWebsiteWebsiteIdRequestObject))
+		return sh.ssi.UpdateWebsiteApiWebsiteWebsiteIdPatch(ctx, request.(UpdateWebsiteApiWebsiteWebsiteIdPatchRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PatchApiWebsiteWebsiteId")
+		handler = middleware(handler, "UpdateWebsiteApiWebsiteWebsiteIdPatch")
 	}
 
 	response, err := handler(ctx, request)
@@ -353,8 +560,8 @@ func (sh *strictHandler) PatchApiWebsiteWebsiteId(ctx *gin.Context, websiteId st
 	if err != nil {
 		ctx.Error(err)
 		ctx.Status(http.StatusInternalServerError)
-	} else if validResponse, ok := response.(PatchApiWebsiteWebsiteIdResponseObject); ok {
-		if err := validResponse.VisitPatchApiWebsiteWebsiteIdResponse(ctx.Writer); err != nil {
+	} else if validResponse, ok := response.(UpdateWebsiteApiWebsiteWebsiteIdPatchResponseObject); ok {
+		if err := validResponse.VisitUpdateWebsiteApiWebsiteWebsiteIdPatchResponse(ctx.Writer); err != nil {
 			ctx.Error(err)
 		}
 	} else if response != nil {
@@ -365,26 +572,34 @@ func (sh *strictHandler) PatchApiWebsiteWebsiteId(ctx *gin.Context, websiteId st
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"AAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

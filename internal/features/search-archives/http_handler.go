@@ -9,23 +9,23 @@ import (
 	"github.com/GymSquad/archive-api/internal/server"
 )
 
-// SearchArchivesHandler is the handler for the search archives endpoint
-type SearchArchivesHandler struct {
+// SearchWebsitesHandler is the handler for the search websites endpoint
+type SearchWebsitesHandler struct {
 	db *sql.DB
 }
 
-// Compile time check to ensure that SearchArchivesHandler implements server.SearchWebsitesHandler.
-var _ server.SearchWebsitesHandler = (*SearchArchivesHandler)(nil)
+// Compile time check to ensure that SearchWebsitesHandler implements server.SearchWebsitesHandler.
+var _ server.SearchWebsitesHandler = (*SearchWebsitesHandler)(nil)
 
 // NewHTTPHandler creates a new SearchArchivesHandler
-func NewHTTPHandler(db *sql.DB) *SearchArchivesHandler {
-	return &SearchArchivesHandler{
+func NewHTTPHandler(db *sql.DB) *SearchWebsitesHandler {
+	return &SearchWebsitesHandler{
 		db: db,
 	}
 }
 
 // HandleRequest implements server.SearchWebsitesHandler.
-func (*SearchArchivesHandler) HandleRequest(ctx context.Context, request api.GetApiWebsiteSearchRequestObject) (api.GetApiWebsiteSearchResponseObject, error) {
+func (*SearchWebsitesHandler) HandleRequest(ctx context.Context, request api.SearchWebsitesApiWebsiteSearchGetRequestObject) (api.SearchWebsitesApiWebsiteSearchGetResponseObject, error) {
 	var result []api.SearchResultEntry
 	var pagination api.Pagination
 
@@ -34,11 +34,11 @@ func (*SearchArchivesHandler) HandleRequest(ctx context.Context, request api.Get
 		Campus:     "交大相關",
 		Department: "行政單位",
 		Office:     "圖書館",
-		Websites:   []api.SearchResultWebsiteEntry{},
+		Websites:   []api.Website{},
 	})
 
 	for i := 0; i < 10; i++ {
-		result[0].Websites = append(result[0].Websites, api.SearchResultWebsiteEntry{
+		result[0].Websites = append(result[0].Websites, api.Website{
 			Id:   strconv.Itoa(i + 1),
 			Name: "交大圖書館",
 			Url:  "https://lib.nctu.edu.tw/",
@@ -51,7 +51,7 @@ func (*SearchArchivesHandler) HandleRequest(ctx context.Context, request api.Get
 		TotalResults: 10,
 	}
 
-	return api.GetApiWebsiteSearch200JSONResponse(api.WebsiteSearchResult{
+	return api.SearchWebsitesApiWebsiteSearchGet200JSONResponse(api.SearchResult{
 		Result:     result,
 		Pagination: pagination,
 	}), nil

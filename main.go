@@ -33,7 +33,7 @@ func main() {
 	searchHandler := searcharchives.NewHTTPHandler(nil)
 	updateHandler := updatewebsite.NewHTTPHandler(nil)
 
-	aApi := server.NewArchiveAPI(datesHandler, searchHandler, updateHandler)
+	aApi := server.NewArchiveAPI(datesHandler, searchHandler, updateHandler, nil, nil, nil)
 	strictApiHandler := api.NewStrictHandler(aApi, nil)
 	api.RegisterHandlers(r, strictApiHandler)
 
