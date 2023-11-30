@@ -15,6 +15,8 @@ import (
 	"github.com/GymSquad/archive-api/internal/server"
 	"github.com/caarlos0/env/v10"
 	"github.com/gin-gonic/gin"
+
+	_ "github.com/joho/godotenv/autoload"
 )
 
 type config struct {
