@@ -8,8 +8,10 @@ import (
 	"github.com/GymSquad/archive-api/api"
 	getarchiveddates "github.com/GymSquad/archive-api/internal/features/get-archived-dates"
 	searcharchives "github.com/GymSquad/archive-api/internal/features/search-archives"
+	searcharchivesquery "github.com/GymSquad/archive-api/internal/features/search-archives/query"
 	swaggerui "github.com/GymSquad/archive-api/internal/features/swagger-ui"
 	updatewebsite "github.com/GymSquad/archive-api/internal/features/update-website"
+	updatewebsitecommand "github.com/GymSquad/archive-api/internal/features/update-website/command"
 	"github.com/GymSquad/archive-api/internal/server"
 	"github.com/gin-gonic/gin"
 )
@@ -29,7 +31,7 @@ func main() {
 
 	r := gin.Default()
 
-	datesHandler := getarchiveddates.NewHTTPHandler(cfg.RootPath)
+	datesHandler := getarchiveddates.NewHTTPHandler(rootPath)
 
 	dummyQuery := searcharchivesquery.NewDummyQuery()
 	searchHandler := searcharchives.NewHTTPHandler(dummyQuery)
