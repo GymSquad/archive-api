@@ -3,6 +3,7 @@ module github.com/GymSquad/archive-api
 go 1.21.4
 
 require (
+	github.com/caarlos0/env/v10 v10.0.0
 	github.com/getkin/kin-openapi v0.120.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/oapi-codegen/runtime v1.1.0
