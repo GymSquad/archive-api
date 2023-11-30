@@ -5,100 +5,88 @@ package api
 
 // Affiliation defines model for Affiliation.
 type Affiliation struct {
-	// Campus Campus name
-	Campus string `json:"campus"`
-
-	// Department Department name
-	Department string `json:"department"`
-
-	// Office Office name
-	Office string `json:"office"`
+	CampusId       string `json:"campus_id"`
+	CampusName     string `json:"campus_name"`
+	DepartmentId   string `json:"department_id"`
+	DepartmentName string `json:"department_name"`
+	OfficeId       string `json:"office_id"`
+	OfficeName     string `json:"office_name"`
 }
 
-// ArchivedDates defines model for ArchivedDates.
-type ArchivedDates = []string
+// Campus defines model for Campus.
+type Campus struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}
+
+// Department defines model for Department.
+type Department struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}
+
+// InvalidPayload defines model for InvalidPayload.
+type InvalidPayload struct {
+	Error string `json:"error"`
+}
+
+// Office defines model for Office.
+type Office struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}
 
 // Pagination defines model for Pagination.
 type Pagination struct {
-	// NextCursor Cursor for next page
-	NextCursor *string `json:"next_cursor"`
-
-	// NumResults Number of websites returned in this page
-	NumResults int `json:"num_results"`
-
-	// TotalResults Total number of websites
-	TotalResults int `json:"total_results"`
+	NextCursor   *string `json:"next_cursor,omitempty"`
+	NumResults   int     `json:"num_results"`
+	TotalResults int     `json:"total_results"`
 }
 
-// SearchResultEntry defines model for SearchResultEntry.
-type SearchResultEntry struct {
-	// Campus Campus name
-	Campus string `json:"campus"`
-
-	// Department Department name
-	Department string `json:"department"`
-
-	// Id Composite ID made of campus, department, and office
-	Id string `json:"id"`
-
-	// Office Office name
-	Office   string                     `json:"office"`
-	Websites []SearchResultWebsiteEntry `json:"websites"`
-}
-
-// SearchResultWebsiteEntry defines model for SearchResultWebsiteEntry.
-type SearchResultWebsiteEntry struct {
-	// Id Website ID
-	Id string `json:"id"`
-
-	// Name Website name
-	Name string `json:"name"`
-
-	// Url Website URL
-	Url string `json:"url"`
-}
-
-// UpdateWebsitePayload defines model for UpdateWebsitePayload.
-type UpdateWebsitePayload struct {
-	// Affiliation Affiliations of the website
-	Affiliation *[]Affiliation `json:"affiliation,omitempty"`
-
-	// Name Website name
-	Name *string `json:"name,omitempty"`
-
-	// Url Website URL
-	Url *string `json:"url,omitempty"`
-}
-
-// Website defines model for Website.
-type Website struct {
-	// Campus Campus name
-	Campus string `json:"campus"`
-
-	// Department Department name
-	Department string `json:"department"`
-
-	// Id Website ID
-	Id string `json:"id"`
-
-	// Name Website name
-	Name string `json:"name"`
-
-	// Office Office name
-	Office string `json:"office"`
-
-	// Url Website URL
-	Url string `json:"url"`
-}
-
-// WebsiteSearchResult defines model for WebsiteSearchResult.
-type WebsiteSearchResult struct {
+// SearchResult defines model for SearchResult.
+type SearchResult struct {
 	Pagination Pagination          `json:"pagination"`
 	Result     []SearchResultEntry `json:"result"`
 }
 
-// GetApiWebsiteSearchParams defines parameters for GetApiWebsiteSearch.
-type GetApiWebsiteSearchParams struct {
+// SearchResultEntry defines model for SearchResultEntry.
+type SearchResultEntry struct {
+	Campus     string    `json:"campus"`
+	Department string    `json:"department"`
+	Id         string    `json:"id"`
+	Office     string    `json:"office"`
+	Websites   []Website `json:"websites"`
+}
+
+// UpdateWebsitePayload defines model for UpdateWebsitePayload.
+type UpdateWebsitePayload struct {
+	Name      *string   `json:"name,omitempty"`
+	OfficeIds *[]string `json:"office_ids,omitempty"`
+	Url       *string   `json:"url,omitempty"`
+}
+
+// UpdatedWebsite defines model for UpdatedWebsite.
+type UpdatedWebsite struct {
+	Affiliations []Affiliation `json:"affiliations"`
+	Id           string        `json:"id"`
+	Name         string        `json:"name"`
+	Url          string        `json:"url"`
+}
+
+// Website defines model for Website.
+type Website struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+	Url  string `json:"url"`
+}
+
+// WebsiteNotFound defines model for WebsiteNotFound.
+type WebsiteNotFound struct {
+	Error string `json:"error"`
+}
+
+// SearchWebsitesApiWebsiteSearchGetParams defines parameters for SearchWebsitesApiWebsiteSearchGet.
+type SearchWebsitesApiWebsiteSearchGetParams struct {
 	// Q Search query
 	Q *string `form:"q,omitempty" json:"q,omitempty"`
 
@@ -109,5 +97,5 @@ type GetApiWebsiteSearchParams struct {
 	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
 }
 
-// PatchApiWebsiteWebsiteIdJSONRequestBody defines body for PatchApiWebsiteWebsiteId for application/json ContentType.
-type PatchApiWebsiteWebsiteIdJSONRequestBody = UpdateWebsitePayload
+// UpdateWebsiteApiWebsiteWebsiteIdPatchJSONRequestBody defines body for UpdateWebsiteApiWebsiteWebsiteIdPatch for application/json ContentType.
+type UpdateWebsiteApiWebsiteWebsiteIdPatchJSONRequestBody = UpdateWebsitePayload
