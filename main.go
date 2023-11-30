@@ -29,9 +29,13 @@ func main() {
 
 	r := gin.Default()
 
-	datesHandler := getarchiveddates.NewHTTPHandler(rootPath)
-	searchHandler := searcharchives.NewHTTPHandler(nil)
-	updateHandler := updatewebsite.NewHTTPHandler(nil)
+	datesHandler := getarchiveddates.NewHTTPHandler(cfg.RootPath)
+
+	dummyQuery := searcharchivesquery.NewDummyQuery()
+	searchHandler := searcharchives.NewHTTPHandler(dummyQuery)
+
+	dummyCommand := updatewebsitecommand.NewDummyCommand()
+	updateHandler := updatewebsite.NewHTTPHandler(dummyCommand)
 
 	aApi := server.NewArchiveAPI(datesHandler, searchHandler, updateHandler, nil, nil, nil)
 	strictApiHandler := api.NewStrictHandler(aApi, nil)
