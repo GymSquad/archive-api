@@ -5,6 +5,14 @@ description = "Default template for PDM package"
 authors = [
     { name = "alan910127", email = "70696274+alan910127@users.noreply.github.com" },
 ]
+dependencies = [
+    "fastapi>=0.109.0",
+    "uvicorn[standard]>=0.26.0",
+    "structlog>=24.1.0",
+    "asgi-correlation-id>=4.3.0",
+    "pydantic>=2.5.3",
+    "pydantic-settings>=2.1.0",
+]
 requires-python = "==3.12.*"
 readme = "README.md"
 license = { text = "MIT" }
@@ -18,6 +26,7 @@ dev = [
 distribution = false
 
 [tool.pdm.scripts]
+dev = "uvicorn app.app:app --reload --port 8000 --host 0.0.0.0 --log-config uvicorn_disable_logging.json"
 format = "ruff format ."
 lint = "ruff check ."
 
