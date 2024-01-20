@@ -1,0 +1,15 @@
+[project]
+name = "archive-api"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "alan910127", email = "70696274+alan910127@users.noreply.github.com"},
+]
+dependencies = []
+requires-python = "==3.12.*"
+readme = "README.md"
+license = {text = "MIT"}
+
+
+[tool.pdm]
+distribution = false
