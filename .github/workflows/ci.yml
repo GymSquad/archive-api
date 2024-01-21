@@ -25,8 +25,17 @@ jobs:
     name: Type checking
     runs-on: ubuntu-latest
     steps:
-      - name: Setup repository
-        uses: ./.github/workflows/setup-repo.yml
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@v3
+        with:
+          python-version: "3.12"
+          cache: true
+
+      - name: Install Dependencies
+        run: pdm install --frozen-lockfile
 
       - name: Add python to PATH
         run: dirname $(pdm info --python) >> $GITHUB_PATH
