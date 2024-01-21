@@ -30,7 +30,7 @@ jobs:
       - name: Install Dependencies
         run: |
           if [ "${{ inputs.dev-dependencies }}" = "true" ]; then
-            pdm install --dev --frozen-lockfile
+            pdm install --frozen-lockfile --group dev
           else
             pdm install --frozen-lockfile
           fi
