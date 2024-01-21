@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from app import logger
+from app import logger, websites
 from app.core import settings
 
 logger.setup_logging(
@@ -30,8 +30,11 @@ class PingResponse(BaseModel):
     message: str = "Server is up and running 🚀"
 
 
-@app.get("/")
+@app.get("/", tags=["ping"])
 async def ping() -> PingResponse:
     """Ping the API to check if it's alive."""
 
     return PingResponse()
+
+
+app.include_router(websites.router)
