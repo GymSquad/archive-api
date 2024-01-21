@@ -10,7 +10,9 @@ readme = "README.md"
 license = { text = "MIT" }
 
 [project.optional-dependencies]
-dev = ["ruff>=0.1.14"]
+dev = [
+    "ruff>=0.1.14",
+]
 
 [tool.pdm]
 distribution = false
