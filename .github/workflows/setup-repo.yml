@@ -1,0 +1,27 @@
+name: Setup Repository for Pipelines
+
+on:
+  workflow_call:
+    inputs:
+      build-command:
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@v3
+        with:
+          python-version: "3.12"
+          cache: true
+
+      - name: Install Dependencies
+        run: pdm install --frozen-lockfile
+
+      - if: ${{ inputs.build-command }}
+        name: Run Build Command
+        run: ${{ inputs.build-command }}
