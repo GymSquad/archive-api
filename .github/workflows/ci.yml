@@ -11,12 +11,14 @@ jobs:
     name: Check formatting
     uses: ./.github/workflows/setup-repo.yml
     with:
+      dev-dependencies: true
       build-command: "pdm run format --check"
 
   lint:
     name: Lint
     uses: ./.github/workflows/setup-repo.yml
     with:
+      dev-dependencies: true
       build-command: "pdm run lint --output-format=github"
 
   typecheck:
