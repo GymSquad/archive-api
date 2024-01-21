@@ -37,11 +37,10 @@ async def update_website(
 
 
 @router.get(
-    "/{website_id}/search",
+    "/search",
     responses={400: {"description": "Invalid parameters"}},
 )
 async def search(
-    website_id: str,
     q: str = "",
     cursor: str = "",
     limit: Annotated[int, Query(ge=1, le=50)] = 10,
