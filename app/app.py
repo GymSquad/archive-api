@@ -1,9 +1,11 @@
+from contextlib import asynccontextmanager
+
 from asgi_correlation_id import CorrelationIdMiddleware
 from fastapi import FastAPI
 from pydantic import BaseModel
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from app import logger, websites
+from app import db, logger, websites
 from app.core import settings
 
 logger.setup_logging(
@@ -11,10 +13,19 @@ logger.setup_logging(
     log_level=settings.LOG_LEVEL,
 )
 
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    await db.init_pool()
+    yield
+    await db.close_pool()
+
+
 app = FastAPI(
     title="Archive API",
     description="API for the WebArchive project",
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 app.add_middleware(BaseHTTPMiddleware, dispatch=logger.logging_middleware)
