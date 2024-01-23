@@ -73,7 +73,6 @@ class SearchResultEntry(BaseModel):
 
 class Pagination(BaseModel):
     next_cursor: str = Field(..., description="Cursor for the next page")
-    has_next: bool = Field(..., description="Whether there is a next page")
     num_results: int = Field(..., description="Number of results in this page")
     total_results: int = Field(..., description="Total number of results")
 
@@ -102,7 +101,6 @@ class SearchResponse(BaseModel):
                 ],
                 "pagination": {
                     "next_cursor": "KGNhbXB1c19pZD1jbHJuYzFtdDcwMDAxMDhsMjF3aGk5eTRyLGRlcGFydG1lbnRfaWQ9Y2xybmMxdGR1MDAwMjA4bDJkbTJoY2ltaSxvZmZpY2VfaWQ9Y2xybmMxd3gwMDAwMzA4bDJoOXN0N2FhYyx3ZWJzaXRlX2lkPWNscm5jMTRkcjAwMDAwOGwyMzVneDRjNmMp",
-                    "has_next": True,
                     "num_results": 1,
                     "total_results": 10,
                 },
