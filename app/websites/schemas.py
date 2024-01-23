@@ -35,21 +35,25 @@ class UpdateWebsitePayload(BaseModel):
 
 class UpdateResponse(BaseModel):
     id: str = Field(..., description="The ID of the website")
-    campus: str = Field(..., description="Campus name")
-    department: str = Field(..., description="Department name")
-    office: str = Field(..., description="Office name")
     name: str = Field(..., description="The name of the website")
     url: AnyUrl = Field(..., description="The URL of the website")
+    affiliations: list[Affiliation] = Field(
+        ..., description="The affiliations of the website"
+    )
 
     model_config: ConfigDict = {
         "json_schema_extra": {
             "example": {
                 "id": "clrnc14dr000008l235gx4c6c",
-                "campus": "交大相關",
-                "department": "行政單位",
-                "office": "圖書館",
                 "name": "交通大學圖書館",
                 "url": "https://www.lib.nctu.edu.tw/",
+                "affiliations": [
+                    {
+                        "campus": "交大相關",
+                        "department": "行政單位",
+                        "office": "圖書館",
+                    }
+                ],
             }
         }
     }
