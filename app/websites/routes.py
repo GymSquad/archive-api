@@ -5,6 +5,7 @@ from fastapi import APIRouter, Query
 from pydantic_core import Url
 
 from app.websites.schemas import (
+    Affiliation,
     Pagination,
     SearchResponse,
     UpdateResponse,
@@ -28,9 +29,13 @@ async def update_website(
 ) -> UpdateResponse:
     return UpdateResponse(
         id="clrnc14dr000008l235gx4c6c",
-        campus="交大相關",
-        department="行政單位",
-        office="圖書館",
+        affiliations=[
+            Affiliation(
+                campus="交大相關",
+                department="行政單位",
+                office="圖書館",
+            )
+        ],
         name="交通大學圖書館",
         url=Url("https://www.lib.nctu.edu.tw/"),
     )
@@ -49,7 +54,6 @@ async def search(
         result=[],
         pagination=Pagination(
             next_cursor="",
-            has_next=False,
             num_results=0,
             total_results=0,
         ),
