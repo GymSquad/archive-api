@@ -32,7 +32,7 @@ async def logging_middleware(
     finally:
         process_time = time.perf_counter_ns() - start_time
         status_code = response.status_code
-        url = get_path_with_query_string(request.scope)  # type: ignore
+        url = get_path_with_query_string(request.scope)  # type: ignore [reportGeneralTypeIssues]
         client_host = cast(Address, request.client).host
         client_port = cast(Address, request.client).port
         http_method = request.method
@@ -51,4 +51,4 @@ async def logging_middleware(
             duration=process_time,
         )
         response.headers["X-Process-Time"] = str(process_time / 1e9)
-        return response
+        return response  # noqa: B012

@@ -32,8 +32,10 @@ def setup_logging(*, development: bool = False, log_level: LogLevel = "INFO") ->
     shared_processors.append(structlog.processors.EventRenamer("message"))
 
     structlog.configure(
-        processors=shared_processors
-        + [structlog.stdlib.ProcessorFormatter.wrap_for_formatter],
+        processors=[
+            *shared_processors,
+            structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
+        ],
         logger_factory=structlog.stdlib.LoggerFactory(),
         cache_logger_on_first_use=True,
     )
