@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  format:
+    name: Check formatting
+    uses: ./.github/workflows/setup-repo.yml
+    with:
+      dev-dependencies: true
+      build-command: "pdm run format --check"
+
+  lint:
+    name: Lint
+    uses: ./.github/workflows/setup-repo.yml
+    with:
+      dev-dependencies: true
+      build-command: "pdm run lint --output-format=github"
+
+  typecheck:
+    name: Type checking
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@v3
+        with:
+          python-version: "3.12"
+          cache: true
+
+      - name: Install Dependencies
+        run: pdm install --frozen-lockfile
+
+      - name: Add python to PATH
+        run: dirname $(pdm info --python) >> $GITHUB_PATH
+
+      - name: Run type checker
+        uses: jakebailey/pyright-action@v2
+        with:
+          pylance-version: latest-release

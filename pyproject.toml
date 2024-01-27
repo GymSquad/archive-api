@@ -3,13 +3,30 @@ name = "archive-api"
 version = "0.1.0"
 description = "Default template for PDM package"
 authors = [
-    {name = "alan910127", email = "70696274+alan910127@users.noreply.github.com"},
+    { name = "alan910127", email = "70696274+alan910127@users.noreply.github.com" },
 ]
-dependencies = []
 requires-python = "==3.12.*"
 readme = "README.md"
-license = {text = "MIT"}
+license = { text = "MIT" }
 
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.1.14",
+]
 
 [tool.pdm]
 distribution = false
+
+[tool.pdm.scripts]
+format = "ruff format ."
+lint = "ruff check ."
+
+[tool.ruff]
+extend-select = [
+    "W",   # pycodestyle warnings
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "PGH", # pygrep-hooks
+    "RUF", # ruff
+]
