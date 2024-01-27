@@ -1,22 +1,23 @@
-import base64
-import binascii
-import string
 from datetime import date
-from typing import Annotated, Literal, Optional, Self
+from itertools import groupby
+from typing import Annotated
 
 import structlog
-from fastapi import APIRouter, HTTPException, Query, status
-from pydantic import BaseModel, ConfigDict, ValidationError
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic_core import Url
-from result import Err, Ok, Result
 
+from app import db
+from app.websites import search
 from app.websites.schemas import (
     Affiliation,
     Pagination,
     SearchResponse,
+    SearchResultEntry,
+    SearchResultWebsite,
     UpdateResponse,
     UpdateWebsitePayload,
 )
+from app.websites.search.cursor import SearchWebsiteCursor
 
 router = APIRouter(
     prefix="/api/website",
@@ -42,72 +43,6 @@ async def update_website(
     )
 
 
-type ParseCursorErrorType = Literal[
-    "base64_decode_error",
-    "unicode_decode_error",
-    "invalid_cursor_format",
-    "validation_failure",
-]
-
-
-class ParseCursorError(BaseModel):
-    type: ParseCursorErrorType
-    msg: str
-
-    model_config: ConfigDict = {"extra": "allow"}
-
-
-class SearchWebsiteCursor(BaseModel):
-    campus_id: str
-    department_id: str
-    office_id: str
-    website_id: str
-
-    def to_base64(self) -> str:
-        str_pairs = ",".join(
-            f"{key}={value}" for key, value in self.model_dump().items()
-        )
-        return base64.b64encode(f"({str_pairs})".encode()).decode()
-
-    @classmethod
-    def from_base64(cls, base64_str: str) -> Result[Self, ParseCursorError]:
-        try:
-            decoded = base64.b64decode(base64_str, validate=True)
-        except binascii.Error as e:
-            return Err(ParseCursorError(type="base64_decode_error", msg=str(e)))
-
-        try:
-            decoded = decoded.decode()
-        except UnicodeDecodeError as e:
-            return Err(ParseCursorError(type="unicode_decode_error", msg=str(e)))
-
-        str_pairs = decoded.strip(string.whitespace + "()").split(",")
-        if not all(pair.count("=") == 1 for pair in str_pairs):
-            return Err(
-                ParseCursorError(
-                    type="invalid_cursor_format",
-                    msg="invalid key-value pair format",
-                )
-            )
-
-        if (n := len(str_pairs)) != 4:
-            return Err(
-                ParseCursorError.model_validate(
-                    {
-                        "type": "invalid_cursor_format",
-                        "msg": "invalid number of pairs",
-                        "got": n,
-                        "expected": 4,
-                    }
-                )
-            )
-
-        try:
-            return Ok(cls.model_validate(dict(pair.split("=") for pair in str_pairs)))
-        except ValidationError as e:
-            return Err(ParseCursorError(type="validation_failure", msg=str(e)))
-
-
 @router.get(
     "/search",
     responses={
@@ -130,6 +65,7 @@ class SearchWebsiteCursor(BaseModel):
     },
 )
 async def search_websites(
+    db: Annotated[db.Connection, Depends(db.get_db)],
     q: str | None = None,
     cursor: Annotated[
         str | None, Query(description="Cursor for pagination (in base64)")
@@ -138,30 +74,64 @@ async def search_websites(
 ) -> SearchResponse:
     logger = structlog.get_logger("websites.search")
 
-    cursor_obj: Optional[SearchWebsiteCursor] = None
-    if cursor is not None:
-        match SearchWebsiteCursor.from_base64(cursor):
-            case Ok(obj):
-                cursor_obj = obj
-            case Err(err):
-                logger.warning(
-                    "Invalid cursor received",
-                    cursor=cursor,
-                    error=err,
-                )
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=[{"loc": ["query", "cursor"], **err.model_dump()}],
-                )
+    match cursor:
+        case None:
+            cursor_obj = SearchWebsiteCursor()
+        case c if (parsed := SearchWebsiteCursor.from_base64(c)).is_ok():
+            cursor_obj = parsed.unwrap()
+        case _:
+            logger.warning("Invalid cursor received", cursor=cursor)
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=[
+                    {
+                        "loc": ["query", "cursor"],
+                        "msg": "invalid key-value pair format",
+                        "type": "invalid_cursor_format",
+                    },
+                ],
+            )
 
-    logger.info("Cursor object", cursor_obj=cursor_obj)
+    searched = await search.search_websites(db, q or "", cursor_obj, limit)
+
+    grouped = groupby(
+        searched.entries,
+        key=lambda e: f"{e.campus_id}${e.department_id}${e.office_id}",
+    )
+
+    result: list[SearchResultEntry] = []
+    for group_key, search_entries in grouped:
+        search_entries = list(search_entries)
+        if len(search_entries) == 0:
+            continue
+
+        first = search_entries[0]
+        websites = [
+            SearchResultWebsite(
+                id=entry.website_id,
+                name=entry.website_name,
+                url=Url(entry.website_url),
+            )
+            for entry in search_entries
+        ]
+        result.append(
+            SearchResultEntry(
+                id=group_key,
+                campus=first.campus_name,
+                department=first.department_name,
+                office=first.office_name,
+                websites=websites,
+            )
+        )
 
     return SearchResponse(
-        result=[],
+        result=result,
         pagination=Pagination(
-            next_cursor="",
-            num_results=0,
-            total_results=0,
+            next_cursor=searched.next_cursor.to_base64()
+            if searched.next_cursor is not None
+            else None,
+            num_results=len(searched.entries),
+            num_left=searched.num_left,
         ),
     )
 

@@ -76,9 +76,9 @@ class SearchResultEntry(BaseModel):
 
 
 class Pagination(BaseModel):
-    next_cursor: str = Field(..., description="Cursor for the next page")
+    next_cursor: Optional[str] = Field(None, description="Cursor for the next page")
     num_results: int = Field(..., description="Number of results in this page")
-    total_results: int = Field(..., description="Total number of results")
+    num_left: int = Field(..., description="Number of results left")
 
 
 class SearchResponse(BaseModel):
