@@ -12,6 +12,7 @@ dependencies = [
     "asgi-correlation-id>=4.3.0",
     "pydantic>=2.5.3",
     "pydantic-settings>=2.1.0",
+    "result>=0.16.0",
 ]
 requires-python = "==3.12.*"
 readme = "README.md"
