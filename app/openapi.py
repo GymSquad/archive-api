@@ -6,7 +6,13 @@ from app.app import app
 
 
 @click.command(name="dump-schema", help="Dump OpenAPI schema to a file")
-@click.option("--dump-path", "-D", type=click.Path(), default="openapi.json", help="Path to dump OpenAPI schema")
+@click.option(
+    "--dump-path",
+    "-D",
+    type=click.Path(),
+    default="openapi.json",
+    help="Path to dump OpenAPI schema",
+)
 def dump_schema(dump_path: str):
     schema = app.openapi()
 
