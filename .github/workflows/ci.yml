@@ -46,14 +46,26 @@ jobs:
           pylance-version: latest-release
 
   openapi:
-    name: Generate OpenAPI schema
+    name: Check OpenAPI schema
     runs-on: ubuntu-latest
     steps:
-      - name: Setup repo
-        uses: ./.github/workflows/setup-repo.yml
-        with:
-          dev-dependencies: true
-          build-command: "pdm run schema:gen diff.json"
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      # - name: Check OpenAPI schema
-      #   run: diff openapi.json diff.json
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@v3
+        with:
+          python-version: "3.12"
+          cache: true
+
+      - name: Install Dependencies
+        run: pdm install --frozen-lockfile
+
+      - name: Add python to PATH
+        run: dirname $(pdm info --python) >> $GITHUB_PATH
+
+      - name: Dump OpenAPI schema
+        run: pdm run schema:gen diff.json
+
+      - name: Check OpenAPI schema
+        run: diff openapi.json diff.json
