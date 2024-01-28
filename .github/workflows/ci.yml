@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, 01-28-dump_openapi]
   pull_request:
   workflow_dispatch:
 
@@ -44,3 +44,16 @@ jobs:
         uses: jakebailey/pyright-action@v2
         with:
           pylance-version: latest-release
+
+  openapi:
+    name: Generate OpenAPI schema
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup repo
+        uses: ./.github/workflows/setup-repo.yml
+        with:
+          dev-dependencies: true
+          build-command: "pdm run schema:gen diff.json"
+
+      - name: Check OpenAPI schema
+        run: diff openapi.json diff.json

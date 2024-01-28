@@ -22,6 +22,7 @@ license = { text = "MIT" }
 [project.optional-dependencies]
 dev = [
     "ruff>=0.1.14",
+    "click>=8.1.7",
 ]
 
 [tool.pdm]
@@ -29,7 +30,7 @@ distribution = false
 
 [tool.pdm.scripts]
 dev = "uvicorn app.app:app --reload --port 8000 --host 0.0.0.0 --log-config uvicorn_disable_logging.json"
-schema = { call = "app.openapi:main" } 
+"schema:gen" = { call = "app.openapi:dump_schema" } 
 format = "ruff format ."
 lint = "ruff check ."
 
