@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [01-28-dump_openapi]
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
