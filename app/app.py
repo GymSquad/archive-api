@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 
 from asgi_correlation_id import CorrelationIdMiddleware
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -26,6 +27,15 @@ app = FastAPI(
     description="API for the WebArchive project",
     version="0.1.0",
     lifespan=lifespan,
+)
+
+origins = ["http://localhost:5173"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.add_middleware(BaseHTTPMiddleware, dispatch=logger.logging_middleware)
