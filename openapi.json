@@ -1,0 +1,564 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Archive API",
+    "description": "API for the WebArchive project",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "tags": [
+          "ping"
+        ],
+        "summary": "Ping",
+        "description": "Ping the API to check if it's alive.",
+        "operationId": "ping__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PingResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/website/{website_id}": {
+      "patch": {
+        "tags": [
+          "websites"
+        ],
+        "summary": "Update Website",
+        "operationId": "update_website_api_website__website_id__patch",
+        "parameters": [
+          {
+            "name": "website_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Website Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateWebsitePayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "websites"
+        ],
+        "summary": "Get Archived Dates",
+        "operationId": "get_archived_dates_api_website__website_id__get",
+        "parameters": [
+          {
+            "name": "website_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Website Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "title": "Response Get Archived Dates Api Website  Website Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/website/search": {
+      "get": {
+        "tags": [
+          "websites"
+        ],
+        "summary": "Search Websites",
+        "operationId": "search_websites_api_website_search_get",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Cursor for pagination (in base64)",
+              "title": "Cursor"
+            },
+            "description": "Cursor for pagination (in base64)"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 10,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": [
+                    {
+                      "loc": [
+                        "query",
+                        "cursor"
+                      ],
+                      "msg": "invalid key-value pair format",
+                      "type": "invalid_cursor_format"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Affiliation": {
+        "properties": {
+          "campus": {
+            "type": "string",
+            "title": "Campus",
+            "description": "Campus name"
+          },
+          "department": {
+            "type": "string",
+            "title": "Department",
+            "description": "Department name"
+          },
+          "office": {
+            "type": "string",
+            "title": "Office",
+            "description": "Office name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "campus",
+          "department",
+          "office"
+        ],
+        "title": "Affiliation"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Pagination": {
+        "properties": {
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor",
+            "description": "Cursor for the next page"
+          },
+          "num_results": {
+            "type": "integer",
+            "title": "Num Results",
+            "description": "Number of results in this page"
+          },
+          "num_left": {
+            "type": "integer",
+            "title": "Num Left",
+            "description": "Number of results left"
+          }
+        },
+        "type": "object",
+        "required": [
+          "num_results",
+          "num_left"
+        ],
+        "title": "Pagination"
+      },
+      "PingResponse": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Server is up and running \ud83d\ude80"
+          }
+        },
+        "type": "object",
+        "title": "PingResponse"
+      },
+      "SearchResponse": {
+        "properties": {
+          "result": {
+            "items": {
+              "$ref": "#/components/schemas/SearchResultEntry"
+            },
+            "type": "array",
+            "title": "Result",
+            "description": "The search result"
+          },
+          "pagination": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Pagination"
+              }
+            ],
+            "description": "Pagination information"
+          }
+        },
+        "type": "object",
+        "required": [
+          "result",
+          "pagination"
+        ],
+        "title": "SearchResponse",
+        "example": {
+          "pagination": {
+            "next_cursor": "KGNhbXB1c19pZD1jbHJuYzFtdDcwMDAxMDhsMjF3aGk5eTRyLGRlcGFydG1lbnRfaWQ9Y2xybmMxdGR1MDAwMjA4bDJkbTJoY2ltaSxvZmZpY2VfaWQ9Y2xybmMxd3gwMDAwMzA4bDJoOXN0N2FhYyx3ZWJzaXRlX2lkPWNscm5jMTRkcjAwMDAwOGwyMzVneDRjNmMp",
+            "num_results": 1,
+            "total_results": 10
+          },
+          "result": [
+            {
+              "campus": "\u4ea4\u5927\u76f8\u95dc",
+              "department": "\u884c\u653f\u55ae\u4f4d",
+              "id": "clrnc1mt7000108l21whi9y4r$clrnc1tdu000208l2dm2hcimi$clrnc1wx0000308l2h9st7aac",
+              "office": "\u5716\u66f8\u9928",
+              "websites": [
+                {
+                  "id": "clrnc14dr000008l235gx4c6c",
+                  "name": "\u4ea4\u901a\u5927\u5b78\u5716\u66f8\u9928",
+                  "url": "https://www.lib.nctu.edu.tw/"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "SearchResultEntry": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Compound ID of the website"
+          },
+          "campus": {
+            "type": "string",
+            "title": "Campus",
+            "description": "Campus name"
+          },
+          "department": {
+            "type": "string",
+            "title": "Department",
+            "description": "Department name"
+          },
+          "office": {
+            "type": "string",
+            "title": "Office",
+            "description": "Office name"
+          },
+          "websites": {
+            "items": {
+              "$ref": "#/components/schemas/SearchResultWebsite"
+            },
+            "type": "array",
+            "title": "Websites",
+            "description": "The websites that match the query"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "campus",
+          "department",
+          "office",
+          "websites"
+        ],
+        "title": "SearchResultEntry"
+      },
+      "SearchResultWebsite": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "The ID of the website"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "The name of the website"
+          },
+          "url": {
+            "type": "string",
+            "minLength": 1,
+            "format": "uri",
+            "title": "Url",
+            "description": "The URL of the website"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "url"
+        ],
+        "title": "SearchResultWebsite"
+      },
+      "UpdateResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "The ID of the website"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "The name of the website"
+          },
+          "url": {
+            "type": "string",
+            "minLength": 1,
+            "format": "uri",
+            "title": "Url",
+            "description": "The URL of the website"
+          },
+          "affiliations": {
+            "items": {
+              "$ref": "#/components/schemas/Affiliation"
+            },
+            "type": "array",
+            "title": "Affiliations",
+            "description": "The affiliations of the website"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "url",
+          "affiliations"
+        ],
+        "title": "UpdateResponse",
+        "example": {
+          "affiliations": [
+            {
+              "campus": "\u4ea4\u5927\u76f8\u95dc",
+              "department": "\u884c\u653f\u55ae\u4f4d",
+              "office": "\u5716\u66f8\u9928"
+            }
+          ],
+          "id": "clrnc14dr000008l235gx4c6c",
+          "name": "\u4ea4\u901a\u5927\u5b78\u5716\u66f8\u9928",
+          "url": "https://www.lib.nctu.edu.tw/"
+        }
+      },
+      "UpdateWebsitePayload": {
+        "properties": {
+          "affiliations": {
+            "items": {
+              "$ref": "#/components/schemas/Affiliation"
+            },
+            "type": "array",
+            "title": "Affiliations",
+            "description": "The affiliations of the website",
+            "default": []
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name",
+            "description": "The name of the website"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "format": "uri"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url",
+            "description": "The URL of the website"
+          }
+        },
+        "type": "object",
+        "title": "UpdateWebsitePayload",
+        "example": {
+          "affiliations": [
+            {
+              "campus": "\u4ea4\u5927\u76f8\u95dc",
+              "department": "\u884c\u653f\u55ae\u4f4d",
+              "office": "\u5716\u66f8\u9928"
+            }
+          ],
+          "name": "\u4ea4\u901a\u5927\u5b78\u5716\u66f8\u9928",
+          "url": "https://www.lib.nctu.edu.tw/"
+        }
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

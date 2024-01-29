@@ -44,3 +44,31 @@ jobs:
         uses: jakebailey/pyright-action@v2
         with:
           pylance-version: latest-release
+
+  openapi:
+    name: Check OpenAPI schema
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@v3
+        with:
+          python-version: "3.12"
+          cache: true
+
+      - name: Install Dependencies
+        run: pdm install --frozen-lockfile
+
+      - name: Add python to PATH
+        run: dirname $(pdm info --python) >> $GITHUB_PATH
+
+      - name: Fabricate environment
+        run: cp .env.example .env
+
+      - name: Dump OpenAPI schema
+        run: pdm run schema:gen --dump-path diff.json
+
+      - name: Check OpenAPI schema
+        run: diff openapi.json diff.json
