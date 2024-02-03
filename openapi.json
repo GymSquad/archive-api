@@ -28,6 +28,48 @@
         }
       }
     },
+    "/api/website/{website_id}/details": {
+      "get": {
+        "tags": [
+          "websites"
+        ],
+        "summary": "Get Website Details",
+        "operationId": "get_website_details_api_website__website_id__details_get",
+        "parameters": [
+          {
+            "name": "website_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Website Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebsiteInfo"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/website/{website_id}": {
       "patch": {
         "tags": [
@@ -251,6 +293,29 @@
           "office"
         ],
         "title": "Affiliation"
+      },
+      "AffiliationId": {
+        "properties": {
+          "campus_id": {
+            "type": "string",
+            "title": "Campus Id"
+          },
+          "department_id": {
+            "type": "string",
+            "title": "Department Id"
+          },
+          "office_id": {
+            "type": "string",
+            "title": "Office Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "campus_id",
+          "department_id",
+          "office_id"
+        ],
+        "title": "AffiliationId"
       },
       "HTTPValidationError": {
         "properties": {
@@ -558,6 +623,48 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "WebsiteInfo": {
+        "properties": {
+          "website_name": {
+            "type": "string",
+            "title": "Website Name"
+          },
+          "website_url": {
+            "type": "string",
+            "title": "Website Url"
+          },
+          "affiliationIds": {
+            "items": {
+              "$ref": "#/components/schemas/AffiliationId"
+            },
+            "type": "array",
+            "title": "Affiliationids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "website_name",
+          "website_url",
+          "affiliationIds"
+        ],
+        "title": "WebsiteInfo",
+        "example": {
+          "affiliationIds": [
+            {
+              "campus_id": "clhjj1v9k0002gbgnbfju6luj",
+              "department_id": "clhjj1vgl000pgbgnuso925sb",
+              "office_id": "clhjj1vqs0038gbgn9cq37eyc"
+            },
+            {
+              "campus_id": "clhjj1v9k0002gbgnbfju6luj",
+              "department_id": "clhjj1vgl000pgbgnuso925sb",
+              "office_id": "clhjj1vra0043gbgnh8wnz32k"
+            }
+          ],
+          "website_name": "\u5716\u66f8\u9928",
+          "website_url": "https://lib.nycu.edu.tw/"
+        }
       }
     }
   }
