@@ -264,6 +264,31 @@
           }
         }
       }
+    },
+    "/api/category/id": {
+      "get": {
+        "tags": [
+          "category"
+        ],
+        "summary": "Get All Categories Id",
+        "operationId": "get_all_categories_id_api_category_id_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array",
+                  "title": "Response Get All Categories Id Api Category Id Get"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
