@@ -68,6 +68,7 @@ async def get_website_info_by_id(conn: db.Connection, website_id: str) -> Websit
     )
 
     if len(rows) == 0:
+        logger.error("website not found", website_id=website_id)
         raise ValueError(f"website_id {website_id} not found")
 
     return WebsiteInfo(
