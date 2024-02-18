@@ -7,7 +7,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic_core import Url
 
 from app import db
-from app.websites import search
+from app.websites import details, search
+from app.websites.details.db import WebsiteInfo
 from app.websites.schemas import (
     Affiliation,
     Pagination,
@@ -23,6 +24,15 @@ router = APIRouter(
     prefix="/api/website",
     tags=["websites"],
 )
+
+
+@router.get("/{website_id}/details")
+async def get_website_details(
+    website_id: str, db: Annotated[db.Connection, Depends(db.get_db)]
+) -> WebsiteInfo:
+    website = await details.get_website_info_by_id(db, website_id)
+
+    return website
 
 
 @router.patch("/{website_id}")
