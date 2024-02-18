@@ -1,6 +1,7 @@
 from typing import Literal
 
-from pydantic import PostgresDsn, computed_field
+from pydantic import computed_field
+from pydantic_core import MultiHostUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from app.logger.custom import LogLevel
@@ -18,7 +19,7 @@ class Settings(BaseSettings):
 
     @computed_field
     def DATABASE_URL(self) -> str:
-        dsn = PostgresDsn.build(
+        dsn = MultiHostUrl.build(
             scheme="postgresql",
             username=self.DB_USER,
             password=self.DB_PASSWORD,
@@ -29,7 +30,7 @@ class Settings(BaseSettings):
 
         return str(dsn)
 
-    model_config: SettingsConfigDict = {
+    model_config: SettingsConfigDict = {  # type: ignore[reportIncompatibleVariableOverride]
         "env_file": ".env",
         "env_file_encoding": "utf-8",
         "extra": "ignore",

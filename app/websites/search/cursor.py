@@ -18,7 +18,7 @@ class ParseCursorError(BaseModel):
     type: ParseCursorErrorType
     msg: str
 
-    model_config: ConfigDict = {"extra": "allow"}
+    model_config: ConfigDict = {"extra": "allow"}  # type: ignore[reportIncompatibleVariableOverride]
 
 
 class SearchWebsiteCursor(BaseModel):

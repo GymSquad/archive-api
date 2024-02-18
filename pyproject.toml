@@ -23,6 +23,7 @@ license = { text = "MIT" }
 dev = [
     "ruff>=0.1.14",
     "click>=8.1.7",
+    "pyright>=1.1.350",
 ]
 
 [tool.pdm]
@@ -33,6 +34,7 @@ dev = "uvicorn app.app:app --reload --port 8000 --host 0.0.0.0 --log-config uvic
 "schema:gen" = { call = "app.openapi:dump_schema" } 
 format = "ruff format ."
 lint = "ruff check ."
+typecheck = "pyright"
 
 [tool.ruff]
 extend-select = [
