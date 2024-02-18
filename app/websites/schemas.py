@@ -16,7 +16,7 @@ class UpdateWebsitePayload(BaseModel):
     name: Optional[str] = Field(None, description="The name of the website")
     url: Optional[AnyUrl] = Field(None, description="The URL of the website")
 
-    model_config: ConfigDict = {
+    model_config: ConfigDict = {  # type: ignore[reportIncompatibleVariableOverride]
         "json_schema_extra": {
             "example": {
                 "affiliations": [
@@ -41,7 +41,7 @@ class UpdateResponse(BaseModel):
         ..., description="The affiliations of the website"
     )
 
-    model_config: ConfigDict = {
+    model_config: ConfigDict = {  # type: ignore[reportIncompatibleVariableOverride]
         "json_schema_extra": {
             "example": {
                 "id": "clrnc14dr000008l235gx4c6c",
@@ -85,7 +85,7 @@ class SearchResponse(BaseModel):
     result: list[SearchResultEntry] = Field(..., description="The search result")
     pagination: Pagination = Field(..., description="Pagination information")
 
-    model_config: ConfigDict = {
+    model_config: ConfigDict = {  # type: ignore[reportIncompatibleVariableOverride]
         "json_schema_extra": {
             "example": {
                 "result": [

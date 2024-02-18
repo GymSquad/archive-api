@@ -20,7 +20,7 @@ class WebsiteInfo(BaseModel):
     website_url: str
     affiliationIds: list[AffiliationId]
 
-    model_config: ConfigDict = {
+    model_config: ConfigDict = {  # type: ignore[reportIncompatibleVariableOverride]
         "json_schema_extra": {
             "example": {
                 "website_name": "圖書館",
