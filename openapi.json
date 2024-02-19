@@ -265,13 +265,13 @@
         }
       }
     },
-    "/api/category/id": {
+    "/api/categories/id": {
       "get": {
         "tags": [
-          "category"
+          "categories"
         ],
         "summary": "Get All Categories Id",
-        "operationId": "get_all_categories_id_api_category_id_get",
+        "operationId": "get_all_categories_id_api_categories_id_get",
         "responses": {
           "200": {
             "description": "Successful Response",

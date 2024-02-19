@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict
 from app import db
 from app.db import Record
 
-router = APIRouter(prefix="/api/category", tags=["category"])
+router = APIRouter(prefix="/api/categories", tags=["categories"])
 
 
 class AllCategoriesIdResponse(BaseModel):
