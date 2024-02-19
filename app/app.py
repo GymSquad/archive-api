@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from app import categories, db, logger, websites
+from app import categories, db, departments, logger, websites
 from app.core import settings
 
 logger.setup_logging(
@@ -60,3 +60,4 @@ async def ping() -> PingResponse:
 
 app.include_router(websites.router)
 app.include_router(categories.router)
+app.include_router(departments.router)
