@@ -20,8 +20,8 @@ class WebsiteInfo(BaseModel):
     website_url: str
     affiliationIds: list[AffiliationId]
 
-    model_config: ConfigDict = {  # type: ignore[reportIncompatibleVariableOverride]
-        "json_schema_extra": {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "website_name": "圖書館",
                 "website_url": "https://lib.nycu.edu.tw/",
@@ -39,7 +39,7 @@ class WebsiteInfo(BaseModel):
                 ],
             }
         }
-    }
+    )
 
 
 async def get_website_info_by_id(conn: db.Connection, website_id: str) -> WebsiteInfo:

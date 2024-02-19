@@ -278,11 +278,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array",
-                  "title": "Response Get All Categories Id Api Category Id Get"
+                  "$ref": "#/components/schemas/AllCategoriesIdResponse"
                 }
               }
             }
@@ -341,6 +337,29 @@
           "office_id"
         ],
         "title": "AffiliationId"
+      },
+      "AllCategoriesIdResponse": {
+        "properties": {
+          "ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ids"
+        ],
+        "title": "AllCategoriesIdResponse",
+        "example": {
+          "ids": [
+            "clhjj1v7c0000gbgn8a5z182n",
+            "clhjj1v9k0002gbgnbfju6luj",
+            "clhjj1v9m0004gbgn0gsst205"
+          ]
+        }
       },
       "HTTPValidationError": {
         "properties": {
