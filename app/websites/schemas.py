@@ -16,8 +16,8 @@ class UpdateWebsitePayload(BaseModel):
     name: Optional[str] = Field(None, description="The name of the website")
     url: Optional[AnyUrl] = Field(None, description="The URL of the website")
 
-    model_config: ConfigDict = {  # type: ignore[reportIncompatibleVariableOverride]
-        "json_schema_extra": {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "affiliations": [
                     {
@@ -30,7 +30,7 @@ class UpdateWebsitePayload(BaseModel):
                 "url": "https://www.lib.nctu.edu.tw/",
             }
         }
-    }
+    )
 
 
 class UpdateResponse(BaseModel):
@@ -41,22 +41,18 @@ class UpdateResponse(BaseModel):
         ..., description="The affiliations of the website"
     )
 
-    model_config: ConfigDict = {  # type: ignore[reportIncompatibleVariableOverride]
-        "json_schema_extra": {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "id": "clrnc14dr000008l235gx4c6c",
                 "name": "交通大學圖書館",
                 "url": "https://www.lib.nctu.edu.tw/",
                 "affiliations": [
-                    {
-                        "campus": "交大相關",
-                        "department": "行政單位",
-                        "office": "圖書館",
-                    }
+                    {"campus": "交大相關", "department": "行政單位", "office": "圖書館"}
                 ],
             }
         }
-    }
+    )
 
 
 class SearchResultWebsite(BaseModel):
@@ -85,8 +81,8 @@ class SearchResponse(BaseModel):
     result: list[SearchResultEntry] = Field(..., description="The search result")
     pagination: Pagination = Field(..., description="Pagination information")
 
-    model_config: ConfigDict = {  # type: ignore[reportIncompatibleVariableOverride]
-        "json_schema_extra": {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "result": [
                     {
@@ -110,4 +106,4 @@ class SearchResponse(BaseModel):
                 },
             }
         }
-    }
+    )
