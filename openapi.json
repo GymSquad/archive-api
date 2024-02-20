@@ -285,6 +285,90 @@
           }
         }
       }
+    },
+    "/api/categories/{category_id}/departments": {
+      "get": {
+        "tags": [
+          "categories"
+        ],
+        "summary": "Get Departments By Category Id",
+        "operationId": "get_departments_by_category_id_api_categories__category_id__departments_get",
+        "parameters": [
+          {
+            "name": "category_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Category Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDepartmentsByCategoryIdResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/departments/{department_id}/offices": {
+      "get": {
+        "tags": [
+          "departments"
+        ],
+        "summary": "Get Offices By Department Id",
+        "operationId": "get_offices_by_department_id_departments__department_id__offices_get",
+        "parameters": [
+          {
+            "name": "department_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Department Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetOfficesByDepartmentIdResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -361,6 +445,88 @@
           ]
         }
       },
+      "DepartmentResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "DepartmentResponse"
+      },
+      "GetDepartmentsByCategoryIdResponse": {
+        "properties": {
+          "departments": {
+            "items": {
+              "$ref": "#/components/schemas/DepartmentResponse"
+            },
+            "type": "array",
+            "title": "Departments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "departments"
+        ],
+        "title": "GetDepartmentsByCategoryIdResponse",
+        "example": {
+          "departments": [
+            {
+              "id": "clhjj1vfa000jgbgn22c3lvyh",
+              "name": "\u5b78\u8853\u55ae\u4f4d"
+            },
+            {
+              "id": "clhjj1vfp000mgbgnrxv5wvpp",
+              "name": "\u884c\u653f\u55ae\u4f4d"
+            },
+            {
+              "id": "clhjj1vg2000ngbgnz7hf002d",
+              "name": "\u7814\u7a76\u55ae\u4f4d"
+            },
+            {
+              "id": "clhjj1vgp000rgbgnxwkh39rg",
+              "name": "\u5b78\u751f\u6d3b\u52d5"
+            }
+          ]
+        }
+      },
+      "GetOfficesByDepartmentIdResponse": {
+        "properties": {
+          "offices": {
+            "items": {
+              "$ref": "#/components/schemas/OfficeResponse"
+            },
+            "type": "array",
+            "title": "Offices"
+          }
+        },
+        "type": "object",
+        "required": [
+          "offices"
+        ],
+        "title": "GetOfficesByDepartmentIdResponse",
+        "example": {
+          "offices": [
+            {
+              "id": "clhjj1voh000tgbgng77i1wp5",
+              "name": "\u6559\u52d9\u8655"
+            },
+            {
+              "id": "clhjj1voi000ugbgnqma6bphq",
+              "name": "\u6821\u9577\u5ba4"
+            }
+          ]
+        }
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -373,6 +539,24 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "OfficeResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "OfficeResponse"
       },
       "Pagination": {
         "properties": {
