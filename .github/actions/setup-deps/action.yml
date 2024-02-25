@@ -30,6 +30,5 @@ runs:
       shell: bash
 
     - name: Activate virtual environment
-      run: |
-        eval $(pdm venv activate)
+      run: dirname $(pdm info --python) >> $GITHUB_PATH
       shell: bash
