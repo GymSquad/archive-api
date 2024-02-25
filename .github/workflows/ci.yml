@@ -9,17 +9,35 @@ on:
 jobs:
   format:
     name: Check formatting
-    uses: ./.github/workflows/setup-repo.yml
-    with:
-      dev-dependencies: true
-      build-command: "pdm run format --check"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Dependencies
+        uses: ./.github/actions/setup-deps
+        with:
+          python-version: "3.12"
+          groups: "dev"
+
+      - name: Run formatter
+        run: pdm run format --check
 
   lint:
-    name: Lint
-    uses: ./.github/workflows/setup-repo.yml
-    with:
-      dev-dependencies: true
-      build-command: "pdm run lint --output-format=github"
+    name: Check linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Dependencies
+        uses: ./.github/actions/setup-deps
+        with:
+          python-version: "3.12"
+          groups: "dev"
+
+      - name: Run linter
+        run: pdm run lint --output-format=github
 
   typecheck:
     name: Type checking
@@ -28,17 +46,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup PDM
-        uses: pdm-project/setup-pdm@v3
+      - name: Setup Dependencies
+        uses: ./.github/actions/setup-deps
         with:
           python-version: "3.12"
-          cache: true
-
-      - name: Install Dependencies
-        run: pdm install --frozen-lockfile
-
-      - name: Add python to PATH
-        run: dirname $(pdm info --python) >> $GITHUB_PATH
 
       - name: Run type checker
         uses: jakebailey/pyright-action@v2
@@ -52,17 +63,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup PDM
-        uses: pdm-project/setup-pdm@v3
+      - name: Setup Dependencies
+        uses: ./.github/actions/setup-deps
         with:
           python-version: "3.12"
-          cache: true
-
-      - name: Install Dependencies
-        run: pdm install --frozen-lockfile
-
-      - name: Add python to PATH
-        run: dirname $(pdm info --python) >> $GITHUB_PATH
 
       - name: Fabricate environment
         run: cp .env.example .env

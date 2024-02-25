@@ -1,0 +1,35 @@
+name: "Setup Project Dependencies"
+description: "Setup project dependencies for a pdm-managed project"
+
+inputs:
+  python-version:
+    description: "Python version to use"
+    required: true
+    default: "3.12"
+  groups:
+    description: "Comma-separated list of groups to install"
+    required: false
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup PDM and Python
+      uses: pdm-project/setup-pdm@v3
+      with:
+        python-version: ${{ inputs.python-version }}
+        cache: true
+
+    - name: Install dependencies
+      run: |
+        if [ -n "${{ inputs.groups }}" ]; then
+          pdm install --frozen-lockfile --group ${{ inputs.groups }}
+        else
+          pdm install --frozen-lockfile
+        fi
+      shell: bash
+
+    - name: Activate virtual environment
+      run: |
+        eval $(pdm venv activate)
+      shell: bash
