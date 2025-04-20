@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime
 from itertools import groupby
 from typing import Annotated
 
@@ -7,10 +7,14 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic_core import Url
 
 from app import db
+from app.core.config import settings
+from app.external.pywb.pywb_service import PywbService, get_pywb_service
+from app.external.pywb.types import PywbArchiveInfo
 from app.websites import details, search
 from app.websites.details.db import WebsiteInfo
 from app.websites.schemas import (
     Affiliation,
+    ArchiveUrlResponse,
     Pagination,
     SearchResponse,
     SearchResultEntry,
@@ -148,6 +152,21 @@ async def search_websites(
 
 # This needs to be after `search_websites` because otherwise FastAPI will
 # treat `search` as a website_id.
-@router.get("/{website_id}")
-async def get_archived_dates(website_id: str) -> list[date]:
-    return []
+@router.get("/{collection}/{url}/archive-urls")
+async def get_archive_urls(
+    collection: str,
+    url: str,
+    pywb_service: Annotated[PywbService, Depends(get_pywb_service)],
+) -> ArchiveUrlResponse:
+    archive_info = await pywb_service.get_archive_info(collection, url)
+
+    unique_timestamps_by_day: dict[str, PywbArchiveInfo] = {}
+    for info in archive_info:
+        timestamp = info.timestamp
+        dt = datetime.strptime(timestamp, "%Y%m%d%H%M%S")
+        day = dt.strftime("%Y-%m-%d")
+        unique_timestamps_by_day[day] = info
+
+    return ArchiveUrlResponse.from_archive_dict(
+        settings.PYWB_BASE_URL, unique_timestamps_by_day
+    )

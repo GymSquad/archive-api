@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     ENVIRONMENT: Literal["development", "production"] = "development"
     LOG_LEVEL: LogLevel = "INFO"
 
+    PYWB_BASE_URL: str
+
     DB_HOST: str
     DB_PORT: int
     DB_USER: str

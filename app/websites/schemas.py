@@ -2,6 +2,8 @@ from typing import Optional
 
 from pydantic import AnyUrl, BaseModel, ConfigDict, Field
 
+from app.external.pywb.types import PywbArchiveInfo
+
 
 class Affiliation(BaseModel):
     campus: str = Field(..., description="Campus name")
@@ -107,3 +109,39 @@ class SearchResponse(BaseModel):
             }
         }
     )
+
+
+class ArchiveUrlItem(BaseModel):
+    timestamp: str = Field(..., description="The timestamp of the archive")
+    url: str = Field(..., description="The URL of the archive")
+
+
+class ArchiveUrlResponse(BaseModel):
+    archive_urls: list[ArchiveUrlItem] = Field(..., description="The archive URLs")
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "archive_urls": [
+                    {
+                        "timestamp": "2025-03-07",
+                        "url": "http://localhost:8080/test1/20250307142531/https://www.cs.nycu.edu.tw/",
+                    }
+                ]
+            }
+        }
+    )
+
+    @classmethod
+    def from_archive_dict(
+        cls, pywb_base_url: str, archive_dict: dict[str, PywbArchiveInfo]
+    ):
+        return cls(
+            archive_urls=[
+                ArchiveUrlItem(
+                    timestamp=timestamp,
+                    url=f"{pywb_base_url}/{info.source_coll}/{info.timestamp}/{info.url}",
+                )
+                for timestamp, info in archive_dict.items()
+            ]
+        )
